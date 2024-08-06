@@ -8,8 +8,10 @@
 import SwiftUI
 
 struct ImageListView: View {
+    @StateObject var vm = PhotoViewModel()
+    
     var body: some View {
-        Text(/*@START_MENU_TOKEN@*/"Hello, World!"/*@END_MENU_TOKEN@*/)
+        Text("테스트")
     }
 }
 

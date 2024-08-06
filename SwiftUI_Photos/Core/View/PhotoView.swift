@@ -8,22 +8,10 @@
 import SwiftUI
 
 struct PhotoView: View {
-    @StateObject var vm = PhotoViewModel()
-    
-    var body: some View {
-        Text("테스트")
-    }
-}
-
-#Preview {
-    ImageListView()
-}
-
-struct PhotoLibraryView: View {
     let items = [GridItem(),GridItem(),GridItem()]
     let width = UIScreen.main.bounds.width
-    @StateObject var vm = PhotoLibraryViewModel()
-
+    @StateObject var vm = PhotoViewModel()
+    
     var body: some View {
         NavigationView {
             List(vm.images, id: \.self) { image in
@@ -36,6 +24,9 @@ struct PhotoLibraryView: View {
             .userAllowAccessAlbum(vm.accessDenied)
             .navigationBarTitle("Photo Library")
         }
-
     }
+}
+
+#Preview {
+    PhotoView()
 }

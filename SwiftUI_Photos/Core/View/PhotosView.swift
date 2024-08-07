@@ -18,11 +18,7 @@ struct PhotosView: View {
                     ForEach(vm.assets.indices, id: \.self) { index in
                         let assets = vm.assets[index]
                         PhotosItemView(assets: assets)
-                            .onAppear{
-                                if vm.assets.count - 1 == index{
-                                    vm.loadNextAssets()
-                                }
-                            }
+                            .environmentObject(vm)
                     }
                 }
             }

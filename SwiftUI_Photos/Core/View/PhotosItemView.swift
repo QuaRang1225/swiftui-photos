@@ -10,7 +10,7 @@ import Photos
 
 struct PhotosItemView: View {
     let assets:PHAsset
-    @StateObject var vm = PhotoViewModel()
+    @EnvironmentObject var vm: PhotoViewModel
     @State var image:UIImage?
     
     var body: some View {
@@ -24,7 +24,7 @@ struct PhotosItemView: View {
         }
         .modifier(ImageModifier(width:width()/3,height:width()/3))
         .onAppear{
-            vm.fetchImageFromAsset(asset: assets) { image = $0 }
+            vm.fetchImageFromAsset(asset: assets,targetSize: CGSize(width: width(), height: width())) { image = $0 }
         }
     }
 }

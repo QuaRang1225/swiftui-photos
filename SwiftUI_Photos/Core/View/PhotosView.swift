@@ -17,6 +17,8 @@ struct PhotosView: View {
     @StateObject var vm = PhotoViewModel()
     
     @State private var size: CGSize = .zero
+    @State private var currentScale: CGFloat = 1.0
+    @State private var lastScale: CGFloat = 1.0
     
     var body: some View {
         
@@ -26,6 +28,7 @@ struct PhotosView: View {
         }
         .progress(vm.progress)
         .userAllowAccessAlbum(vm.accessDenied)
+        .gesture(gridAdjustmenGesture)
         .onAppear{
             size = CGSize(width: width()/numberOfColumns, height: width()/numberOfColumns)
         }
@@ -83,6 +86,32 @@ struct PhotosView: View {
                 }
                 withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
                     self.position = .zero
+                }
+            }
+    }
+    var gridAdjustmenGesture:some Gesture{
+        MagnificationGesture()
+            .onChanged { value in
+                withAnimation(.spring()){
+                    self.currentScale = value.magnitude
+                    let scaleDifference = self.currentScale / self.lastScale
+                    if scaleDifference > 1.2 {
+                        if numberOfColumns > 1 {
+                            numberOfColumns -= 1
+                        }
+                        self.lastScale = self.currentScale
+                    } else if scaleDifference < 0.8 {
+                        if numberOfColumns < 5 {
+                            numberOfColumns += 1
+                        }
+                        self.lastScale = self.currentScale
+                    }
+                    size = CGSize(width: UIScreen.main.bounds.width / CGFloat(numberOfColumns), height: UIScreen.main.bounds.width / CGFloat(numberOfColumns))
+                }
+            }
+            .onEnded { _ in
+                withAnimation(.spring()){
+                    self.lastScale = 1.0
                 }
             }
     }

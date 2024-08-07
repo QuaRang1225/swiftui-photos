@@ -12,6 +12,7 @@ struct PhotosView: View {
     
     @State private var numberOfColumns: CGFloat = 3
     @State private var selectedAssets: PHAsset?
+    @State private var selectedVideo: VideoPlayerItem?
     @State private var position = CGSize.zero
     @Namespace private var namespace
     @StateObject var vm = PhotoViewModel()
@@ -33,25 +34,39 @@ struct PhotosView: View {
             size = CGSize(width: width()/numberOfColumns, height: width()/numberOfColumns)
         }
     }
-    var imageListView:some View{
+    private var imageListView:some View{
         NavigationView {
             ScrollView {
                 let assetsItems =  Array(repeating: GridItem(.flexible(), spacing: 0), count: Int(numberOfColumns))
                 LazyVGrid(columns:assetsItems,spacing: 0){
                     ForEach(vm.assets, id: \.self) { asset in
-                        PhotosItemView(assets: asset)
-                            .scaledToFill()
-                            .frame(width: size.width, height: size.height)
-                            .clipShape(Rectangle()) // 원하는 모양으로 클리핑
-                            .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
-                            .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
-                            .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
-                            .onTapGesture {
+                        Group{
+                            switch asset.mediaType{
+                            case .image: PhotosItemView(assets: asset)
+                            case .video: PhotosItemView(assets: asset)
+                                    .overlay {
+                                        Text("\(asset.duration)")
+                                    }
+                            default: Color.clear
+                            }
+                        }
+                        .scaledToFill()
+                        .frame(width: size.width, height: size.height)
+                        .clipShape(Rectangle()) // 원하는 모양으로 클리핑
+                        .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
+                        .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
+                        .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
+                        .onTapGesture {
+                            switch asset.mediaType{
+                            case .image:
                                 withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
                                     selectedAssets = asset
                                 }
+                            case .video: playVideo(asset:asset,id:asset.localIdentifier)
+                            default: return
                             }
-                            .environmentObject(vm)
+                        }
+                        .environmentObject(vm)
                     }
                     
                 }
@@ -60,10 +75,10 @@ struct PhotosView: View {
         }
     }
     @ViewBuilder
-    var imageItemView:some View{
+    private var imageItemView:some View{
         Color.black
             .ignoresSafeArea()
-            .opacity(selectedAssets == nil ? 0 : min(1, max(0, 1 - abs(Double(position.height) / 800))))
+            .opacity((selectedAssets == nil && selectedVideo == nil ) ? 0 : min(1, max(0, 1 - abs(Double(position.height) / 800))))
         if let selectedAssets {
             PhotosItemView(assets: selectedAssets)
                 .scaledToFit()
@@ -72,8 +87,11 @@ struct PhotosView: View {
                 .gesture(imageCloseGesture)
                 .environmentObject(vm)
         }
+        if let selectedVideo{
+            VideoPlayerView(item: $selectedVideo)
+        }
     }
-    var imageCloseGesture:some Gesture{
+    private var imageCloseGesture:some Gesture{
         DragGesture()
             .onChanged { value in
                 self.position = value.translation
@@ -89,7 +107,7 @@ struct PhotosView: View {
                 }
             }
     }
-    var gridAdjustmenGesture:some Gesture{
+    private var gridAdjustmenGesture:some Gesture{
         MagnificationGesture()
             .onChanged { value in
                 withAnimation(.spring()){
@@ -114,6 +132,20 @@ struct PhotosView: View {
                     self.lastScale = 1.0
                 }
             }
+    }
+    private func playVideo(asset: PHAsset,id:String){
+        let options = PHVideoRequestOptions()
+        options.isNetworkAccessAllowed = true
+        
+        PHImageManager.default().requestPlayerItem(forVideo: asset, options: options) { playerItem, _ in
+            DispatchQueue.main.async {
+                withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
+                    if let playerItem = playerItem {
+                        selectedVideo = VideoPlayerItem(id: id, playerItem: AVPlayer(playerItem: playerItem))
+                    }
+                }
+            }
+        }
     }
 }
 

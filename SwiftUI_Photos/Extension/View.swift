@@ -12,6 +12,9 @@ extension View{
     func width()->CGFloat{
         UIScreen.main.bounds.width
     }
+    func height()->CGFloat{
+        UIScreen.main.bounds.height
+    }
     func userAllowAccessAlbum(_ accessDenied:Bool) -> some View{
         ZStack{
             if !accessDenied{

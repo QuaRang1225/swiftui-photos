@@ -12,7 +12,6 @@ struct PhotosItemView: View {
     let assets:PHAsset
     @EnvironmentObject var vm: PhotoViewModel
     @State var image:UIImage?
-    
     var body: some View {
         ZStack{
             if let image{
@@ -22,9 +21,8 @@ struct PhotosItemView: View {
                 Color.gray.opacity(0.1)
             }
         }
-        .modifier(ImageModifier(width:width()/3,height:width()/3))
         .onAppear{
-            vm.fetchImageFromAsset(asset: assets,targetSize: CGSize(width: width(), height: width())) { image = $0 }
+            vm.fetchImageFromAsset(asset: assets,targetSize: CGSize(width: width(), height: height())) { image = $0 }
         }
     }
 }

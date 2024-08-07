@@ -34,4 +34,17 @@ extension View{
             }
         }
     }
+    func progress(_ isLoading:Bool) -> some View{
+        ZStack{
+            self
+            if isLoading{
+                Color.black.opacity(0.5).ignoresSafeArea()
+                VStack{
+                    ProgressView()
+                    Text("이미지를 불러오는 중입니다.")
+                        .font(.caption)
+                }
+            }
+        }
+    }
 }

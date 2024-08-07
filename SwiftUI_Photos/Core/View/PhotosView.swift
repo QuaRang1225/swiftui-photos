@@ -22,6 +22,7 @@ struct PhotosView: View {
                     }
                 }
             }
+            .progress(vm.progress)
             .userAllowAccessAlbum(vm.accessDenied)
             .navigationBarTitle("갤러리")
         }

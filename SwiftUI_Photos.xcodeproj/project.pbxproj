@@ -19,6 +19,7 @@
 		D60A53942C624667001F73F2 /* View.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53932C624667001F73F2 /* View.swift */; };
 		D60A53962C63094F001F73F2 /* PhotosItemView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53952C63094F001F73F2 /* PhotosItemView.swift */; };
 		D60A53992C630C5A001F73F2 /* ImageModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53982C630C5A001F73F2 /* ImageModifier.swift */; };
+		D60A539C2C6356A2001F73F2 /* FetchPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A539B2C6356A2001F73F2 /* FetchPhoto.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -55,6 +56,7 @@
 		D60A53932C624667001F73F2 /* View.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = View.swift; sourceTree = "<group>"; };
 		D60A53952C63094F001F73F2 /* PhotosItemView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosItemView.swift; sourceTree = "<group>"; };
 		D60A53982C630C5A001F73F2 /* ImageModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageModifier.swift; sourceTree = "<group>"; };
+		D60A539B2C6356A2001F73F2 /* FetchPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchPhoto.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -106,6 +108,7 @@
 			isa = PBXGroup;
 			children = (
 				D60A53892C6208CA001F73F2 /* SwiftUI-Photos-Info.plist */,
+				D60A539A2C635690001F73F2 /* Protocol */,
 				D60A53972C630C46001F73F2 /* Modifier */,
 				D60A538A2C6215C3001F73F2 /* Extension */,
 				D60A53852C61F8D1001F73F2 /* App */,
@@ -190,6 +193,14 @@
 				D60A53982C630C5A001F73F2 /* ImageModifier.swift */,
 			);
 			path = Modifier;
+			sourceTree = "<group>";
+		};
+		D60A539A2C635690001F73F2 /* Protocol */ = {
+			isa = PBXGroup;
+			children = (
+				D60A539B2C6356A2001F73F2 /* FetchPhoto.swift */,
+			);
+			path = Protocol;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -323,6 +334,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				D60A53962C63094F001F73F2 /* PhotosItemView.swift in Sources */,
+				D60A539C2C6356A2001F73F2 /* FetchPhoto.swift in Sources */,
 				D60A53992C630C5A001F73F2 /* ImageModifier.swift in Sources */,
 				D60A53882C61F8F0001F73F2 /* PhotosView.swift in Sources */,
 				D60A53922C623FFA001F73F2 /* PhotoViewModel.swift in Sources */,

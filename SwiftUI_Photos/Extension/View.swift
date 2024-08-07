@@ -9,7 +9,9 @@ import Foundation
 import SwiftUI
 
 extension View{
-
+    func width()->CGFloat{
+        UIScreen.main.bounds.width
+    }
     func userAllowAccessAlbum(_ accessDenied:Bool) -> some View{
         ZStack{
             if !accessDenied{

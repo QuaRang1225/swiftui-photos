@@ -55,11 +55,11 @@ extension View{
             .gesture(
                 DragGesture()
                 .onChanged { value in
-                    position.wrappedValue = value.translation
+                    position.wrappedValue = CGSize(width: 0, height: value.translation.height)
                 }
                 .onEnded { value in
                     if 50 < position.wrappedValue.height {
-                        withAnimation(.spring()){
+                        withAnimation(.spring(duration: 0.1)){
                             closeAction()
                             position.wrappedValue = .zero
                         }

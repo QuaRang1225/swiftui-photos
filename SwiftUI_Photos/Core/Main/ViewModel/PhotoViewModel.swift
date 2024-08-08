@@ -97,4 +97,26 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             completion(image)
         }
     }
+    
+    func fetchAlbumsFirstAssets(collection:PHAssetCollection)->PHAsset?{
+        let fetchOptions = PHFetchOptions()
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        fetchOptions.fetchLimit = 1
+        let assets = PHAsset.fetchAssets(in: collection, options: fetchOptions)
+        
+        return assets.firstObject
+        
+    }
+    
+    func fetchPhotosFirstAssets(mode:PhotosFilter) -> PHAsset?{
+        let fetchOptions = PHFetchOptions()
+        if mode == .bookmark{
+            fetchOptions.predicate = NSPredicate(format: "favorite == YES")
+        }
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        fetchOptions.fetchLimit = 1
+        
+        let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)
+        return fetchResult.firstObject
+   }
 }

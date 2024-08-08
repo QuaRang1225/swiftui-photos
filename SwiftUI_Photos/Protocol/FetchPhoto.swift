@@ -11,6 +11,7 @@ import UIKit
 
 protocol FetchPhoto{
     func fetchAssets()
+    func fetchAlbums()
     func fetchImageFromAsset(asset: PHAsset,targetSize:CGSize,completion: @escaping (UIImage?)->())
-    func loadAssets()
+    func fetchAlbumAssets(from collection: PHAssetCollection?)
 }

@@ -22,7 +22,7 @@ struct VideoPlayerView: View {
     var body: some View {
         VStack{
             AVPlayerView(player: item?.playerItem)
-                .gesture(videoCloseGesture)
+                .itemCloseGesture(position: $offset){ self.item = nil }
                 .overlay(alignment: .bottomTrailing,content: {speakerView})
             timeProgressionView
             optionsView
@@ -84,28 +84,6 @@ struct VideoPlayerView: View {
             let targetTime = CMTime(seconds: time, preferredTimescale: duration.timescale)
             await playerItem.seek(to: targetTime)
         }
-    }
-    ///비디오를 닫기위한 제스쳐
-    ///height offset 50이상 드래그 다운 시 전체 화면 close
-    private var videoCloseGesture:some Gesture{
-        DragGesture()
-            .onChanged { value in
-                withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
-                    self.offset = value.translation
-                }
-            }
-            .onEnded { _ in
-                if 50 < self.offset.height {
-                    withAnimation(.spring()){
-                        self.item = nil
-                        self.offset = .zero
-                    }
-                }else{
-                    withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
-                        self.offset = .zero
-                    }
-                }
-            }
     }
     private var speakerView:some View{
         Button {

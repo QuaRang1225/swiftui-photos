@@ -24,6 +24,7 @@
 		D60A53AC2C643CF7001F73F2 /* TimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53AB2C643CF7001F73F2 /* TimeInterval.swift */; };
 		D60A53AE2C645452001F73F2 /* PlayModeFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53AD2C645452001F73F2 /* PlayModeFilter.swift */; };
 		D60A53B32C64A8E1001F73F2 /* AVPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53B22C64A8E0001F73F2 /* AVPlayerView.swift */; };
+		D60A53B52C64AED8001F73F2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53B42C64AED8001F73F2 /* ContentView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -65,6 +66,7 @@
 		D60A53AB2C643CF7001F73F2 /* TimeInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeInterval.swift; sourceTree = "<group>"; };
 		D60A53AD2C645452001F73F2 /* PlayModeFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayModeFilter.swift; sourceTree = "<group>"; };
 		D60A53B22C64A8E0001F73F2 /* AVPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVPlayerView.swift; sourceTree = "<group>"; };
+		D60A53B42C64AED8001F73F2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +178,7 @@
 			children = (
 				D60A53872C61F8F0001F73F2 /* PhotosView.swift */,
 				D60A53952C63094F001F73F2 /* PhotosItemView.swift */,
+				D60A53B42C64AED8001F73F2 /* ContentView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -387,6 +390,7 @@
 				D60A53922C623FFA001F73F2 /* PhotoViewModel.swift in Sources */,
 				D60A53AA2C640327001F73F2 /* VideoPlayerView.swift in Sources */,
 				D60A53942C624667001F73F2 /* View.swift in Sources */,
+				D60A53B52C64AED8001F73F2 /* ContentView.swift in Sources */,
 				D60A53832C61F580001F73F2 /* Documentation.docc in Sources */,
 				D60A53562C61D79C001F73F2 /* SwiftUI_PhotosApp.swift in Sources */,
 			);

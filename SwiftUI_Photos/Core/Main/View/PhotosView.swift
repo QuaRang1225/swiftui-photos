@@ -15,7 +15,7 @@ struct PhotosView: View {
     @State private var selectedVideo: VideoPlayerItem?
     @State private var position = CGSize.zero
     @Namespace private var namespace
-    @StateObject var vm = PhotoViewModel()
+    @EnvironmentObject var vm:PhotoViewModel
     
     @State private var size: CGSize = .zero
     @State private var currentScale: CGFloat = 1.0
@@ -27,6 +27,7 @@ struct PhotosView: View {
             imageListView
             imageItemView
         }
+        .environmentObject(vm)
         .progress(vm.progress)
         .userAllowAccessAlbum(vm.accessDenied)
         .gesture(gridAdjustmenGesture)
@@ -34,13 +35,12 @@ struct PhotosView: View {
             size = CGSize(width: width()/numberOfColumns, height: width()/numberOfColumns)
         }
     }
-    private var imageListView:some View{
-        NavigationView {
-            ScrollView {
-                let assetsItems =  Array(repeating: GridItem(.flexible(), spacing: 0), count: Int(numberOfColumns))
-                LazyVGrid(columns:assetsItems,spacing: 0){
-                    ForEach(vm.assets, id: \.self) { asset in
-                        PhotosItemView(assets: asset)
+    var imageListView:some View{
+        ScrollView {
+            let assetsItems =  Array(repeating: GridItem(.flexible(), spacing: 0), count: Int(numberOfColumns))
+            LazyVGrid(columns:assetsItems,spacing: 0){
+                ForEach(vm.assets, id: \.self) { asset in
+                    PhotosItemView(assets: asset)
                         .scaledToFill()
                         .frame(width: size.width, height: size.height)
                         .clipShape(Rectangle()) // 원하는 모양으로 클리핑
@@ -63,13 +63,10 @@ struct PhotosView: View {
                             default: return
                             }
                         }
-                        .environmentObject(vm)
-                    }
-                    
                 }
             }
-            .navigationBarTitle("갤러리")
         }
+        .navigationBarTitle("갤러리")
     }
     @ViewBuilder
     private var imageItemView:some View{
@@ -81,29 +78,13 @@ struct PhotosView: View {
                 .scaledToFit()
                 .matchedGeometryEffect(id: selectedAssets.localIdentifier, in: namespace)
                 .offset(position)
-                .gesture(imageCloseGesture)
-                .environmentObject(vm)
+                .itemCloseGesture(position: $position) {self.selectedAssets = nil}
         }
         if selectedVideo != nil{
             VideoPlayerView(item: $selectedVideo)
         }
     }
-    private var imageCloseGesture:some Gesture{
-        DragGesture()
-            .onChanged { value in
-                self.position = value.translation
-            }
-            .onEnded { value in
-                withAnimation(.spring()) {
-                    if 50 < self.position.height {
-                        self.selectedAssets = nil
-                    }
-                }
-                withAnimation(.spring(response: 0.45, dampingFraction: 0.75)) {
-                    self.position = .zero
-                }
-            }
-    }
+    
     private var gridAdjustmenGesture:some Gesture{
         MagnificationGesture()
             .onChanged { value in
@@ -148,4 +129,5 @@ struct PhotosView: View {
 
 #Preview {
     PhotosView()
+        .environmentObject(PhotoViewModel())
 }

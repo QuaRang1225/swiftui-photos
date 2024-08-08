@@ -50,4 +50,26 @@ extension View{
             }
         }
     }
+    func itemCloseGesture(position: Binding<CGSize>,closeAction:@escaping()->()) -> some View{
+        self
+            .gesture(
+                DragGesture()
+                .onChanged { value in
+                    position.wrappedValue = value.translation
+                }
+                .onEnded { value in
+                    if 50 < position.wrappedValue.height {
+                        withAnimation(.spring()){
+                            closeAction()
+                            position.wrappedValue = .zero
+                        }
+                    }else{
+                        withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
+                            position.wrappedValue = .zero
+                        }
+                    }
+                }
+            )
+        
+    }
 }

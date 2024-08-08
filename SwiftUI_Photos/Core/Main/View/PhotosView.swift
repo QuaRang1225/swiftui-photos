@@ -40,22 +40,19 @@ struct PhotosView: View {
                 let assetsItems =  Array(repeating: GridItem(.flexible(), spacing: 0), count: Int(numberOfColumns))
                 LazyVGrid(columns:assetsItems,spacing: 0){
                     ForEach(vm.assets, id: \.self) { asset in
-                        Group{
-                            switch asset.mediaType{
-                            case .image: PhotosItemView(assets: asset)
-                            case .video: PhotosItemView(assets: asset)
-                                    .overlay {
-                                        Text("\(asset.duration)")
-                                    }
-                            default: Color.clear
-                            }
-                        }
+                        PhotosItemView(assets: asset)
                         .scaledToFill()
                         .frame(width: size.width, height: size.height)
                         .clipShape(Rectangle()) // 원하는 모양으로 클리핑
                         .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
                         .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
                         .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
+                        .overlay(alignment:.bottomTrailing){
+                            if asset.mediaType == .video{
+                                Text(asset.duration.timeFormatter())
+                                    .padding(2)
+                            }
+                        }
                         .onTapGesture {
                             switch asset.mediaType{
                             case .image:
@@ -87,7 +84,7 @@ struct PhotosView: View {
                 .gesture(imageCloseGesture)
                 .environmentObject(vm)
         }
-        if let selectedVideo{
+        if selectedVideo != nil{
             VideoPlayerView(item: $selectedVideo)
         }
     }
@@ -140,7 +137,7 @@ struct PhotosView: View {
         PHImageManager.default().requestPlayerItem(forVideo: asset, options: options) { playerItem, _ in
             DispatchQueue.main.async {
                 withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
-                    if let playerItem = playerItem {
+                    if let playerItem {
                         selectedVideo = VideoPlayerItem(id: id, playerItem: AVPlayer(playerItem: playerItem))
                     }
                 }

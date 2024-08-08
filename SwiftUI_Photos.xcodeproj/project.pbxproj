@@ -21,6 +21,9 @@
 		D60A539C2C6356A2001F73F2 /* FetchPhoto.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A539B2C6356A2001F73F2 /* FetchPhoto.swift */; };
 		D60A53A82C6402E0001F73F2 /* VideoPlayerItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53A72C6402E0001F73F2 /* VideoPlayerItem.swift */; };
 		D60A53AA2C640327001F73F2 /* VideoPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53A92C640327001F73F2 /* VideoPlayerView.swift */; };
+		D60A53AC2C643CF7001F73F2 /* TimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53AB2C643CF7001F73F2 /* TimeInterval.swift */; };
+		D60A53AE2C645452001F73F2 /* PlayModeFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53AD2C645452001F73F2 /* PlayModeFilter.swift */; };
+		D60A53B32C64A8E1001F73F2 /* AVPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53B22C64A8E0001F73F2 /* AVPlayerView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -59,6 +62,9 @@
 		D60A539B2C6356A2001F73F2 /* FetchPhoto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = FetchPhoto.swift; sourceTree = "<group>"; };
 		D60A53A72C6402E0001F73F2 /* VideoPlayerItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerItem.swift; sourceTree = "<group>"; };
 		D60A53A92C640327001F73F2 /* VideoPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VideoPlayerView.swift; sourceTree = "<group>"; };
+		D60A53AB2C643CF7001F73F2 /* TimeInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeInterval.swift; sourceTree = "<group>"; };
+		D60A53AD2C645452001F73F2 /* PlayModeFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayModeFilter.swift; sourceTree = "<group>"; };
+		D60A53B22C64A8E0001F73F2 /* AVPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVPlayerView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -150,8 +156,8 @@
 		D60A53842C61F8C7001F73F2 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				D60A53902C623FB8001F73F2 /* ViewModel */,
-				D60A53862C61F8E2001F73F2 /* View */,
+				D60A53B02C64A8A8001F73F2 /* Video */,
+				D60A53AF2C64A893001F73F2 /* Main */,
 			);
 			path = Core;
 			sourceTree = "<group>";
@@ -170,7 +176,6 @@
 			children = (
 				D60A53872C61F8F0001F73F2 /* PhotosView.swift */,
 				D60A53952C63094F001F73F2 /* PhotosItemView.swift */,
-				D60A53A92C640327001F73F2 /* VideoPlayerView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -179,6 +184,7 @@
 			isa = PBXGroup;
 			children = (
 				D60A53932C624667001F73F2 /* View.swift */,
+				D60A53AB2C643CF7001F73F2 /* TimeInterval.swift */,
 			);
 			path = Extension;
 			sourceTree = "<group>";
@@ -202,6 +208,7 @@
 		D60A53A12C63E3D8001F73F2 /* Filter */ = {
 			isa = PBXGroup;
 			children = (
+				D60A53AD2C645452001F73F2 /* PlayModeFilter.swift */,
 			);
 			path = Filter;
 			sourceTree = "<group>";
@@ -212,6 +219,32 @@
 				D60A53A72C6402E0001F73F2 /* VideoPlayerItem.swift */,
 			);
 			path = Model;
+			sourceTree = "<group>";
+		};
+		D60A53AF2C64A893001F73F2 /* Main */ = {
+			isa = PBXGroup;
+			children = (
+				D60A53902C623FB8001F73F2 /* ViewModel */,
+				D60A53862C61F8E2001F73F2 /* View */,
+			);
+			path = Main;
+			sourceTree = "<group>";
+		};
+		D60A53B02C64A8A8001F73F2 /* Video */ = {
+			isa = PBXGroup;
+			children = (
+				D60A53B12C64A8B1001F73F2 /* View */,
+			);
+			path = Video;
+			sourceTree = "<group>";
+		};
+		D60A53B12C64A8B1001F73F2 /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D60A53A92C640327001F73F2 /* VideoPlayerView.swift */,
+				D60A53B22C64A8E0001F73F2 /* AVPlayerView.swift */,
+			);
+			path = View;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -344,7 +377,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D60A53B32C64A8E1001F73F2 /* AVPlayerView.swift in Sources */,
 				D60A53962C63094F001F73F2 /* PhotosItemView.swift in Sources */,
+				D60A53AE2C645452001F73F2 /* PlayModeFilter.swift in Sources */,
+				D60A53AC2C643CF7001F73F2 /* TimeInterval.swift in Sources */,
 				D60A539C2C6356A2001F73F2 /* FetchPhoto.swift in Sources */,
 				D60A53882C61F8F0001F73F2 /* PhotosView.swift in Sources */,
 				D60A53A82C6402E0001F73F2 /* VideoPlayerItem.swift in Sources */,

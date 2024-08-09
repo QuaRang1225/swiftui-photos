@@ -184,7 +184,9 @@ struct PhotosView: View {
                 .background(Material.thin)
                 ScrollView(showsIndicators: false){
                     VStack{
-                        ForEach(PhotosFilter.allCases.filter{$0 != .all && $0 != .other},id: \.self){ filter in
+                        let filter = PhotosFilter.allCases.filter{$0 != .all && $0 != .other}
+                        Text("사진").font(.title).bold()
+                        ForEach(filter.filter{$0.type == .photo},id: \.self){ filter in
                             Button {
                                 self.photosMode = filter
                                 menu = false
@@ -193,12 +195,25 @@ struct PhotosView: View {
                                     Image(systemName: filter.image)
                                     Text(filter.rawValue)
                                 }
-                                .foregroundColor(.white)
+                                
                                 .padding(.vertical,15)
                             }
                         }
-                    }
-                    .padding(.top,100)
+                        Text("비디오").font(.title).bold()
+                        ForEach(filter.filter{$0.type == .video},id: \.self){ filter in
+                            Button {
+                                self.photosMode = filter
+                                menu = false
+                            } label: {
+                                HStack{
+                                    Image(systemName: filter.image)
+                                    Text(filter.rawValue)
+                                }
+                                .padding(.vertical,15)
+                            }
+                        }
+                    }.foregroundColor(.white)
+                    .padding(.vertical,100)
                 }
             }
         }

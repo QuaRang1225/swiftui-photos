@@ -25,6 +25,7 @@ struct PhotosView: View {
     @State var photosMode:PhotosFilter = .all
     @State private var scrollOffsetY: CGFloat = 0.0
     @State private var mainOffsetY: CGFloat = 0.0
+    @State private var lastminY: CGFloat = .zero
     
     @State var image:UIImage?
     
@@ -61,15 +62,14 @@ struct PhotosView: View {
                     let minY = proxy.frame(in: .global).minY
                     Color.clear
                         .onChange(of: minY) { value in
-                            
-                                if value < mainOffsetY{
+                                if abs(value - lastminY) > 10 {    //임계값 10으로 설정
+                                    lastminY = value
                                     withAnimation {
-                                        show = false
-                                    }
-                                }
-                                if value > mainOffsetY{
-                                    withAnimation {
-                                    show = true
+                                        if lastminY < mainOffsetY {
+                                            show = false
+                                        } else if lastminY > mainOffsetY {
+                                            show = true
+                                        }
                                     }
                                 }
                         }

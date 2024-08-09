@@ -17,6 +17,8 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
     @Published var albums: [PHAssetCollection] = []
     @Published var album:PHAssetCollection?
     
+    @Published var isAsscending = false
+    
     private let group = DispatchGroup()
     private let userInteractiveQueue = DispatchQueue.global(qos: .userInteractive)
     private let fetchAlbumAssetQueue = DispatchQueue.global(qos: .userInteractive)
@@ -54,7 +56,7 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
         //필터링,정렬 등 받아온 결괏값의 옵션을 부여할 수 있는 클래스
         let fetchOptions = PHFetchOptions()
         //날짜 순으로 내림차순
-        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: isAsscending)]
         //Assets(항목)을 받아오는 메서드 (PHFetchResult 클래스 타입)
         var assets = PHFetchResult<PHAsset>()
         if let collection{
@@ -100,7 +102,7 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
     
     func fetchAlbumsFirstAssets(collection:PHAssetCollection)->PHAsset?{
         let fetchOptions = PHFetchOptions()
-        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: isAsscending)]
         fetchOptions.fetchLimit = 1
         let assets = PHAsset.fetchAssets(in: collection, options: fetchOptions)
         
@@ -113,7 +115,7 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
         if mode == .bookmark{
             fetchOptions.predicate = NSPredicate(format: "favorite == YES")
         }
-        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: false)]
+        fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: isAsscending)]
         fetchOptions.fetchLimit = 1
         
         let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)

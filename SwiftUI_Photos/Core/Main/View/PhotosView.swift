@@ -23,10 +23,10 @@ struct PhotosView: View {
     
     @State var show = true
     @State var photosMode:PhotosFilter = .all
-    @State private var scrollOffsetY: CGFloat = 0.0
-    @State private var mainOffsetY: CGFloat = 0.0
+    @State private var mainOffsetY: CGFloat = .zero
     @State private var lastminY: CGFloat = .zero
     
+    @State var isFill = true
     @State var image:UIImage?
     
     var imageList:[PHAsset]{
@@ -62,23 +62,24 @@ struct PhotosView: View {
                     let minY = proxy.frame(in: .global).minY
                     Color.clear
                         .onChange(of: minY) { value in
-                                if abs(value - lastminY) > 10 {    //임계값 10으로 설정
-                                    lastminY = value
-                                    withAnimation {
-                                        if lastminY < mainOffsetY {
-                                            show = false
-                                        } else if lastminY > mainOffsetY {
-                                            show = true
-                                        }
+                            if abs(value - lastminY) > 15 {    //임계값 10으로 설정
+                                lastminY = value
+                                withAnimation {
+                                    if show,lastminY < mainOffsetY {
+                                        show = false
+                                    } else if !show,lastminY > mainOffsetY {
+                                        show = true
                                     }
                                 }
+                            }
                         }
-                }.frame(height: 1)
+                }
+                .frame(height: 1)
                 LazyVGrid(columns:assetsItems,spacing: 0){
                     ForEach(imageList, id: \.self) { asset in
                         PhotosItemView(assets: asset)
                             .background(Color.white)
-                            .scaledToFill()
+                            .aspectRatio(contentMode: isFill ? .fill : .fit)
                             .frame(width: size.width, height: size.height)
                             .clipShape(Rectangle()) // 원하는 모양으로 클리핑
                             .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
@@ -106,30 +107,59 @@ struct PhotosView: View {
             }
         }
         .overlay(alignment: .topLeading){
-            VStack{
-                headerView
+            VStack(spacing: 0){
+                HStack{
+                    headerView
+                    Spacer()
+                    if !show{
+                        ratioView
+                            .matchedGeometryEffect(id: "ratio", in: ratioNamespace)
+                            .padding()
+                    }
+                }
+                .background(LinearGradient(colors: [.black.opacity(0.3),.clear], startPoint: .top, endPoint: .bottom).ignoresSafeArea())
+                if show{
+                    optionCategoryView
+                }
                 albumsListView
             }
-            
         }
     }
     var headerView:some View{
-        HStack{
+        HStack(alignment: .top){
             VStack(alignment: .leading){
                 Text(photosMode == .other ? vm.album?.localizedTitle ?? "" : photosMode.rawValue)
                     .font(.largeTitle)
                 Text("\(imageList.count)개의 항목")
             }
             .foregroundStyle(.white)
-            .padding()
+            
             .bold()
             Spacer()
-            
         }
-        .background(LinearGradient(colors: [.black.opacity(0.3),.clear], startPoint: .top, endPoint: .bottom))
+        .padding()
+        
         .allowsHitTesting(false)
+        
     }
-    
+    var ratioView:some View{
+        Button {
+            withAnimation {
+                isFill.toggle()
+            }
+        } label: {
+            VStack{
+                Image(systemName: isFill ? "arrow.down.forward.and.arrow.up.backward.square":"arrow.down.backward.and.arrow.up.forward.square")
+                    .font(.title3)
+                    .padding(10)
+                    .background(Circle().foregroundColor(.gray))
+                Text("비율")
+                    .shadow(radius: 1)
+                    .font(.caption)
+            }
+            .foregroundColor(.white)
+        }
+    }
     var assetControllView:some View{
         GeometryReader{ geo in
             let minY = geo.frame(in: .global).minY
@@ -137,7 +167,7 @@ struct PhotosView: View {
                 if let image{
                     Image(uiImage: image)
                         .resizable()
-                       
+                    
                 }else{
                     Color.gray.opacity(0.3)
                 }
@@ -147,26 +177,48 @@ struct PhotosView: View {
                 Color.clear
                     .background(Material.thin)
                     .overlay(alignment:.bottom){
-                        LinearGradient(colors: [.clear,.black], startPoint: .top, endPoint: .bottom)
+                        LinearGradient(colors: [.clear,.reversal], startPoint: .top, endPoint: .bottom)
                             .frame(height: 30)
                     }
             }
             .offset(x:minY > 0 ? -minY/2 : 0,
                     y:minY > 0 ? -minY : 0)
             .frame(width: width() + (minY > 0 ? minY : 0),
-                   height: (show ? height()/3  + 20: height()/6 + 20) + (minY > 0 ? minY: 0))
+                   height: (show ? height()/2.5  + 20: height()/6 + 20) + (minY > 0 ? minY: 0))
             .scaledToFill()
         }
-        .padding(.bottom,(show ? height()/3 : height()/6) - 10)
-        .environmentObject(vm)
+        .padding(.bottom,(show ? height()/2.5 : height()/6) - 10)
     }
-    
+    var optionCategoryView:some View{
+        HStack{
+            ratioView.matchedGeometryEffect(id: "ratio", in: ratioNamespace)
+            Button {
+                withAnimation {
+                    vm.isAsscending.toggle()
+                    vm.fetchAlbumAssets(from: vm.album)
+                    show = false
+                }
+            } label: {
+                VStack{
+                    Image(systemName: "arrow.up.arrow.down")
+                        .font(.title3)
+                        .padding(10)
+                        .background(Circle().foregroundColor(.gray))
+                    Text(vm.isAsscending ? "과거순":"최신순")
+                        .font(.caption)
+                }
+                .foregroundColor(.white)
+            }
+            Spacer()
+        }
+        .padding([.horizontal,.bottom])
+    }
     var albumsListView:some View{
         func labelType(text:String) -> some View{
             Text(text)
                 .font(.subheadline)
                 .bold()
-                .foregroundColor(.primary)
+                .foregroundColor(.white)
                 .lineLimit(1)
                 .frame(width: 100)
         }
@@ -174,35 +226,19 @@ struct PhotosView: View {
             ScrollView(.horizontal,showsIndicators: false){
                 if show{
                     HStack{
-                        ForEach(PhotosFilter.allCases.filter{$0 != .other},id: \.self){ collection in
-                            @State var assets:PHAsset?
                             Button {
-                                photosMode = collection
+                                photosMode = .all
                                 vm.album = nil
                                 vm.fetchAlbumAssets(from: nil)
-                                if collection == .all{
-                                    if let asset = vm.fetchPhotosFirstAssets(mode:.all){
-                                        vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
-                                    }
-                                }
-                                else if collection == .bookmark{
-                                    if let asset = vm.fetchPhotosFirstAssets(mode:.bookmark){
-                                        vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
-                                    }
-                                }else{
-                                    self.image = nil
+                                if let asset = vm.fetchPhotosFirstAssets(mode:.all){
+                                    vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
                                 }
                             } label: {
                                 VStack{
-                                    if collection == .all{
-                                        albumCategoryRow(assets: vm.fetchPhotosFirstAssets(mode:.all))
-                                    }else if collection == .bookmark{
-                                        albumCategoryRow(assets: vm.fetchPhotosFirstAssets(mode:.bookmark))
-                                    }
-                                    labelType(text:collection.rawValue)
+                                    albumCategoryRow(assets: vm.fetchPhotosFirstAssets(mode:.all))
+                                    labelType(text:PhotosFilter.all.rawValue)
                                 }
                             }
-                        }
                         ForEach(vm.albums, id: \.self) { collection in
                             Button {
                                 photosMode = .other
@@ -228,8 +264,14 @@ struct PhotosView: View {
                     .onAppear{
                         mainOffsetY = proxy.frame(in: .global).minY
                     }
-                    .onChange(of: show) { _ in
-                        mainOffsetY = proxy.frame(in: .global).minY
+                    .onChange(of: show) { value in
+                        withAnimation {
+                            if value{
+                                mainOffsetY = proxy.frame(in: .global).minY
+                            }else{
+                                mainOffsetY = lastminY
+                            }
+                        }
                     }
             }
             .frame(height: 1)

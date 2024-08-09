@@ -77,6 +77,7 @@ struct PhotosView: View {
                 LazyVGrid(columns:assetsItems,spacing: 0){
                     ForEach(imageList, id: \.self) { asset in
                         PhotosItemView(assets: asset)
+                            .background(Color.white)
                             .scaledToFill()
                             .frame(width: size.width, height: size.height)
                             .clipShape(Rectangle()) // 원하는 모양으로 클리핑
@@ -228,7 +229,7 @@ struct PhotosView: View {
                         mainOffsetY = proxy.frame(in: .global).minY
                     }
                     .onChange(of: show) { _ in
-                        mainOffsetY = proxy.frame(in: .global).minY - 30
+                        mainOffsetY = proxy.frame(in: .global).minY
                     }
             }
             .frame(height: 1)
@@ -280,12 +281,12 @@ struct PhotosView: View {
     }
     
     private func albumCategoryRow(assets:PHAsset?) -> some View{
-        Group{
+        ZStack{
+            Color.white
+            Color.gray.opacity(0.3)
             if let assets{
                 PhotosItemView(assets: assets)
                     .scaledToFill()
-            }else{
-                Color.gray.opacity(0.3)
             }
         }
         .frame(width: width()/3.5, height: width()/3.5)

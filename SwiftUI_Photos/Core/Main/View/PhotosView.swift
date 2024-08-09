@@ -30,6 +30,12 @@ struct PhotosView: View {
     @State var menu = false
     @State var image:UIImage?
     
+    @State var endOffset = CGSize.zero
+    @State var currentOffset = CGSize.zero
+    @State var mainCurrentScale:CGFloat = 1
+    @State var endScale:CGFloat = 1
+    @GestureState var changed = false
+    
     var imageList:[PHAsset]{
         switch photosMode{
         case .all,.other:
@@ -361,15 +367,59 @@ struct PhotosView: View {
     
     @ViewBuilder
     private var imageItemView:some View{
-        Color.black
+        Color.reversal
+            .overlay(Color.gray.opacity(0.2))
             .ignoresSafeArea()
-            .opacity((selectedAssets == nil && selectedVideo == nil ) ? 0 : min(1, max(0, 1 - abs(Double(position.height) / 800))))
+            .opacity((selectedAssets == nil && selectedVideo == nil ) ? 0 : min(1, max(0, 1 - Double(position.height / 800))))
         if let selectedAssets {
-            PhotosItemView(assets: selectedAssets)
-                .scaledToFit()
-                .matchedGeometryEffect(id: selectedAssets.localIdentifier, in: namespace)
-                .offset(position)
-                .itemCloseGesture(position: $position) {self.selectedAssets = nil}
+            GeometryReader{ geo in
+                let g = geo.frame(in: .named("G"))
+                PhotosItemView(assets: selectedAssets)
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity,maxHeight: .infinity)
+                    .matchedGeometryEffect(id: selectedAssets.localIdentifier, in: namespace)
+                    .onChange(of: changed) { change in
+                        withAnimation(.easeIn(duration: 0.1)){
+                            if g.minX > 0{
+                                currentOffset.width = currentOffset.width - g.minX
+                            }
+                            if g.minY > 0{
+                                currentOffset.height = currentOffset.height - g.minY
+                                if mainCurrentScale == 1{
+                                    self.selectedAssets = nil
+                                }
+                            }
+                            if g.maxX < width(){
+                                currentOffset.width = g.minX - currentOffset.width
+                            }
+                            if g.maxY < width(){
+                                currentOffset.height = g.minY - currentOffset.height
+                            }
+                            if !change{
+                                endOffset = currentOffset
+                            }
+                        }
+                    }
+            }
+            .scaleEffect(mainCurrentScale)
+            .offset(currentOffset)
+            .frame(height: height()/1.3)
+            .simultaneousGesture(drag)
+            .simultaneousGesture(pinch)
+            .onTapGesture(count: 2) { // 더블 탭 감지
+                withAnimation {
+                    if mainCurrentScale == 1{
+                        mainCurrentScale = 2
+                        endScale = 2
+                    }else{
+                        mainCurrentScale = 1
+                        endScale = 1
+                        currentOffset = .zero
+                        endOffset = .zero
+                    }
+                }
+            }
+            .coordinateSpace(name: "G")
         }
         if selectedVideo != nil{
             VideoPlayerView(item: $selectedVideo)
@@ -429,6 +479,37 @@ struct PhotosView: View {
                 }
             }
         }
+    }
+    
+    var drag:some Gesture{
+        DragGesture()
+            .updating($changed){ _,changed,_ in
+                changed = true
+            }
+            .onChanged{ gesture in
+                currentOffset = endOffset + gesture.translation
+            }
+    }
+    var pinch:some Gesture{
+        MagnificationGesture()
+            .updating($changed){ _,changed,_ in
+                changed = true
+            }
+            .onChanged { gesture in
+                mainCurrentScale = min(max(gesture + endScale - 1, 1), 3)
+            }
+            .onEnded { gesture in
+                withAnimation(.easeIn(duration: 0.1)){
+                    endScale = min(max(endScale + gesture - 1, 1), 3)
+                    if endScale < 1 {
+                        mainCurrentScale = 1 // 스케일을 기본 값 1로 리셋
+                        endScale = 1 // 스케일을 기본 값 1로 리셋
+                        currentOffset = .zero // 오프셋을 기본 값으로 리셋
+                        endOffset = .zero // 오프셋을 기본 값으로 리셋
+                    }
+                }
+            }
+            
     }
 }
 

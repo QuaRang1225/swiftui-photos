@@ -27,6 +27,7 @@ struct PhotosView: View {
     @State private var lastminY: CGFloat = .zero
     
     @State var isFill = true
+    @State var menu = false
     @State var image:UIImage?
     
     var imageList:[PHAsset]{
@@ -35,12 +36,33 @@ struct PhotosView: View {
             return vm.assets
         case .bookmark:
             return vm.assets.filter({$0.isFavorite})
+        case .video:
+            return vm.assets.filter{$0.mediaType == .video}
+        case .photoScreenshot:
+            return vm.assets.filter{ $0.mediaSubtypes == .photoScreenshot }
+        case .photoLive:
+            return vm.assets.filter{ $0.mediaSubtypes == .photoLive }
+        case .photoHDR:
+            return vm.assets.filter{ $0.mediaSubtypes == .photoHDR }
+        case .photoPanorama:
+            return vm.assets.filter{ $0.mediaSubtypes == .photoPanorama }
+        case .photoDepthEffect:
+            return vm.assets.filter{ $0.mediaSubtypes == .photoDepthEffect }
+        case .videoStreamed:
+            return vm.assets.filter{ $0.mediaSubtypes == .videoStreamed }
+        case .videoCinematic:
+            return vm.assets.filter{ $0.mediaSubtypes == .videoCinematic }
+        case .videoTimelapse:
+            return vm.assets.filter{ $0.mediaSubtypes == .videoTimelapse }
+        case .videoHighFrameRate:
+            return vm.assets.filter{ $0.mediaSubtypes == .videoHighFrameRate }
         }
     }
     var body: some View {
         ZStack{
             imageListView
             imageItemView
+            menuView
         }
         .environmentObject(vm)
         .progress(vm.progress)
@@ -113,8 +135,20 @@ struct PhotosView: View {
                     Spacer()
                     if !show{
                         ratioView
-                            .matchedGeometryEffect(id: "ratio", in: ratioNamespace)
+                            .matchedGeometryEffect(id: "ratio", in: namespace)
                             .padding()
+                    }
+                    if show{
+                        Button {
+                            withAnimation {
+                                menu.toggle()
+                            }
+                        } label: {
+                            Image(systemName: "ellipsis")
+                                .font(.title3)
+                                .foregroundColor(.white)
+                        }
+                        .padding()
                     }
                 }
                 .background(LinearGradient(colors: [.black.opacity(0.3),.clear], startPoint: .top, endPoint: .bottom).ignoresSafeArea())
@@ -136,11 +170,43 @@ struct PhotosView: View {
             
             .bold()
             Spacer()
+            
         }
         .padding()
         
         .allowsHitTesting(false)
         
+    }
+    var menuView:some View{
+        ZStack{
+            if menu{
+            Color.clear
+                .background(Material.thin)
+                ScrollView(showsIndicators: false){
+                    VStack{
+                        ForEach(PhotosFilter.allCases.filter{$0 != .all && $0 != .other},id: \.self){ filter in
+                            Button {
+                                self.photosMode = filter
+                                menu = false
+                            } label: {
+                                HStack{
+                                    Image(systemName: filter.image)
+                                    Text(filter.rawValue)
+                                }
+                                .foregroundColor(.white)
+                                .padding(.vertical,15)
+                            }
+                        }
+                    }
+                    .padding(.top,100)
+                }
+            }
+        }
+        .onTapGesture {
+            withAnimation {
+                menu.toggle()
+            }
+        }
     }
     var ratioView:some View{
         Button {
@@ -191,7 +257,7 @@ struct PhotosView: View {
     }
     var optionCategoryView:some View{
         HStack{
-            ratioView.matchedGeometryEffect(id: "ratio", in: ratioNamespace)
+            ratioView.matchedGeometryEffect(id: "ratio", in: namespace)
             Button {
                 withAnimation {
                     vm.isAsscending.toggle()

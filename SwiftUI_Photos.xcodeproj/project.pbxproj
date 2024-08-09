@@ -27,6 +27,7 @@
 		D60A53B52C64AED8001F73F2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53B42C64AED8001F73F2 /* ContentView.swift */; };
 		D6ABD31E2C65244700ADA099 /* PhotosFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ABD31D2C65244700ADA099 /* PhotosFilter.swift */; };
 		D6ABD32A2C664D5C00ADA099 /* LocationMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ABD3292C664D5C00ADA099 /* LocationMapView.swift */; };
+		D6ABD32C2C66905F00ADA099 /* MediaTypeFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ABD32B2C66905F00ADA099 /* MediaTypeFilter.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -71,6 +72,7 @@
 		D60A53B42C64AED8001F73F2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D6ABD31D2C65244700ADA099 /* PhotosFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosFilter.swift; sourceTree = "<group>"; };
 		D6ABD3292C664D5C00ADA099 /* LocationMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationMapView.swift; sourceTree = "<group>"; };
+		D6ABD32B2C66905F00ADA099 /* MediaTypeFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaTypeFilter.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -218,6 +220,7 @@
 			children = (
 				D60A53AD2C645452001F73F2 /* PlayModeFilter.swift */,
 				D6ABD31D2C65244700ADA099 /* PhotosFilter.swift */,
+				D6ABD32B2C66905F00ADA099 /* MediaTypeFilter.swift */,
 			);
 			path = Filter;
 			sourceTree = "<group>";
@@ -394,6 +397,7 @@
 				D60A53882C61F8F0001F73F2 /* PhotosView.swift in Sources */,
 				D60A53A82C6402E0001F73F2 /* VideoPlayerItem.swift in Sources */,
 				D6ABD32A2C664D5C00ADA099 /* LocationMapView.swift in Sources */,
+				D6ABD32C2C66905F00ADA099 /* MediaTypeFilter.swift in Sources */,
 				D60A53922C623FFA001F73F2 /* PhotoViewModel.swift in Sources */,
 				D60A53AA2C640327001F73F2 /* VideoPlayerView.swift in Sources */,
 				D60A53942C624667001F73F2 /* View.swift in Sources */,

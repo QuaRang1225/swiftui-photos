@@ -15,14 +15,28 @@ struct PhotosView: View {
     @State private var selectedVideo: VideoPlayerItem?
     @State private var position = CGSize.zero
     @Namespace private var namespace
-    @EnvironmentObject var vm:PhotoViewModel
+    @StateObject var vm = PhotoViewModel()
     
     @State private var size: CGSize = .zero
     @State private var currentScale: CGFloat = 1.0
     @State private var lastScale: CGFloat = 1.0
     
+    @State var show = true
+    @State var photosMode:PhotosFilter = .all
+    @State private var scrollOffsetY: CGFloat = 0.0
+    @State private var mainOffsetY: CGFloat = 0.0
+    
+    @State var image:UIImage?
+    
+    var imageList:[PHAsset]{
+        switch photosMode{
+        case .all,.other:
+            return vm.assets
+        case .bookmark:
+            return vm.assets.filter({$0.isFavorite})
+        }
+    }
     var body: some View {
-        
         ZStack{
             imageListView
             imageItemView
@@ -32,42 +46,195 @@ struct PhotosView: View {
         .userAllowAccessAlbum(vm.accessDenied)
         .gesture(gridAdjustmenGesture)
         .onAppear{
+            if let asset = vm.fetchPhotosFirstAssets(mode:.all){
+                vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
+            }
             size = CGSize(width: width()/numberOfColumns, height: width()/numberOfColumns)
         }
     }
     var imageListView:some View{
         ScrollView {
-            let assetsItems =  Array(repeating: GridItem(.flexible(), spacing: 0), count: Int(numberOfColumns))
-            LazyVGrid(columns:assetsItems,spacing: 0){
-                ForEach(vm.assets, id: \.self) { asset in
-                    PhotosItemView(assets: asset)
-                        .scaledToFill()
-                        .frame(width: size.width, height: size.height)
-                        .clipShape(Rectangle()) // 원하는 모양으로 클리핑
-                        .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
-                        .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
-                        .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
-                        .overlay(alignment:.bottomTrailing){
-                            if asset.mediaType == .video{
-                                Text(asset.duration.timeFormatter())
-                                    .padding(2)
-                            }
-                        }
-                        .onTapGesture {
-                            switch asset.mediaType{
-                            case .image:
-                                withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
-                                    selectedAssets = asset
+            VStack(spacing:0){
+                let assetsItems =  Array(repeating: GridItem(.flexible(), spacing: 0), count: Int(numberOfColumns))
+                assetControllView
+                GeometryReader{ proxy in
+                    let minY = proxy.frame(in: .global).minY
+                    Color.clear
+                        .onChange(of: minY) { value in
+                            
+                                if value < mainOffsetY{
+                                    withAnimation {
+                                        show = false
+                                    }
                                 }
-                            case .video: playVideo(asset:asset,id:asset.localIdentifier)
-                            default: return
-                            }
+                                if value > mainOffsetY{
+                                    withAnimation {
+                                    show = true
+                                    }
+                                }
                         }
+                }.frame(height: 1)
+                LazyVGrid(columns:assetsItems,spacing: 0){
+                    ForEach(imageList, id: \.self) { asset in
+                        PhotosItemView(assets: asset)
+                            .scaledToFill()
+                            .frame(width: size.width, height: size.height)
+                            .clipShape(Rectangle()) // 원하는 모양으로 클리핑
+                            .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
+                            .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
+                            .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
+                            .overlay(alignment:.bottomTrailing){
+                                if asset.mediaType == .video{
+                                    Text(asset.duration.timeFormatter())
+                                        .shadow(radius: 1)
+                                        .padding(2)
+                                }
+                            }
+                            .onTapGesture {
+                                switch asset.mediaType{
+                                case .image:
+                                    withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
+                                        selectedAssets = asset
+                                    }
+                                case .video: playVideo(asset:asset,id:asset.localIdentifier)
+                                default: return
+                                }
+                            }
+                    }
                 }
             }
         }
-        .navigationBarTitle("갤러리")
+        .overlay(alignment: .topLeading){
+            VStack{
+                headerView
+                albumsListView
+            }
+            
+        }
     }
+    var headerView:some View{
+        HStack{
+            VStack(alignment: .leading){
+                Text(photosMode == .other ? vm.album?.localizedTitle ?? "" : photosMode.rawValue)
+                    .font(.largeTitle)
+                Text("\(imageList.count)개의 항목")
+            }
+            .foregroundStyle(.white)
+            .padding()
+            .bold()
+            Spacer()
+            
+        }
+        .background(LinearGradient(colors: [.black.opacity(0.3),.clear], startPoint: .top, endPoint: .bottom))
+        .allowsHitTesting(false)
+    }
+    
+    var assetControllView:some View{
+        GeometryReader{ geo in
+            let minY = geo.frame(in: .global).minY
+            Group{
+                if let image{
+                    Image(uiImage: image)
+                        .resizable()
+                       
+                }else{
+                    Color.gray.opacity(0.3)
+                }
+            }
+            .overlay{
+                Color.black.opacity(0.5)
+                Color.clear
+                    .background(Material.thin)
+                    .overlay(alignment:.bottom){
+                        LinearGradient(colors: [.clear,.black], startPoint: .top, endPoint: .bottom)
+                            .frame(height: 30)
+                    }
+            }
+            .offset(x:minY > 0 ? -minY/2 : 0,
+                    y:minY > 0 ? -minY : 0)
+            .frame(width: width() + (minY > 0 ? minY : 0),
+                   height: (show ? height()/3  + 20: height()/6 + 20) + (minY > 0 ? minY: 0))
+            .scaledToFill()
+        }
+        .padding(.bottom,(show ? height()/3 : height()/6) - 10)
+        .environmentObject(vm)
+    }
+    
+    var albumsListView:some View{
+        func labelType(text:String) -> some View{
+            Text(text)
+                .font(.subheadline)
+                .bold()
+                .foregroundColor(.primary)
+                .lineLimit(1)
+                .frame(width: 100)
+        }
+        return VStack{
+            ScrollView(.horizontal,showsIndicators: false){
+                if show{
+                    HStack{
+                        ForEach(PhotosFilter.allCases.filter{$0 != .other},id: \.self){ collection in
+                            @State var assets:PHAsset?
+                            Button {
+                                photosMode = collection
+                                vm.album = nil
+                                vm.fetchAlbumAssets(from: nil)
+                                if collection == .all{
+                                    if let asset = vm.fetchPhotosFirstAssets(mode:.all){
+                                        vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
+                                    }
+                                }
+                                else if collection == .bookmark{
+                                    if let asset = vm.fetchPhotosFirstAssets(mode:.bookmark){
+                                        vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
+                                    }
+                                }else{
+                                    self.image = nil
+                                }
+                            } label: {
+                                VStack{
+                                    if collection == .all{
+                                        albumCategoryRow(assets: vm.fetchPhotosFirstAssets(mode:.all))
+                                    }else if collection == .bookmark{
+                                        albumCategoryRow(assets: vm.fetchPhotosFirstAssets(mode:.bookmark))
+                                    }
+                                    labelType(text:collection.rawValue)
+                                }
+                            }
+                        }
+                        ForEach(vm.albums, id: \.self) { collection in
+                            Button {
+                                photosMode = .other
+                                vm.album = collection
+                                vm.fetchAlbumAssets(from: collection)
+                                if let asset = vm.fetchAlbumsFirstAssets(collection: collection){
+                                    vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
+                                }else{
+                                    self.image = nil
+                                }
+                            } label: {
+                                VStack{
+                                    albumCategoryRow(assets: vm.fetchAlbumsFirstAssets(collection: collection))
+                                    labelType(text: collection.localizedTitle ?? "")
+                                }
+                            }
+                        }
+                    }.padding(.horizontal)
+                }
+            }
+            GeometryReader{ proxy in
+                Color.clear
+                    .onAppear{
+                        mainOffsetY = proxy.frame(in: .global).minY
+                    }
+                    .onChange(of: show) { _ in
+                        mainOffsetY = proxy.frame(in: .global).minY - 30
+                    }
+            }
+            .frame(height: 1)
+        }
+    }
+    
     @ViewBuilder
     private var imageItemView:some View{
         Color.black
@@ -110,6 +277,20 @@ struct PhotosView: View {
                     self.lastScale = 1.0
                 }
             }
+    }
+    
+    private func albumCategoryRow(assets:PHAsset?) -> some View{
+        Group{
+            if let assets{
+                PhotosItemView(assets: assets)
+                    .scaledToFill()
+            }else{
+                Color.gray.opacity(0.3)
+            }
+        }
+        .frame(width: width()/3.5, height: width()/3.5)
+        .clipped()
+        .cornerRadius(5)
     }
     private func playVideo(asset: PHAsset,id:String){
         let options = PHVideoRequestOptions()

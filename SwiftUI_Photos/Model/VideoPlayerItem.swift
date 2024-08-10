@@ -7,8 +7,10 @@
 
 import Foundation
 import AVKit
+import Photos
 
 struct VideoPlayerItem: Identifiable {
     let id: String
+    let asset:PHAsset
     var playerItem: AVPlayer
 }

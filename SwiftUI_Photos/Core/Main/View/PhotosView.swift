@@ -42,6 +42,7 @@ struct PhotosView: View {
     @State var adress:(country:String?, city:String?,district:String?)?
     @State var isMap = false
     
+    
     var imageList:[PHAsset]{
         switch photosMode{
         case .all,.other:
@@ -202,7 +203,7 @@ struct PhotosView: View {
     var menuView:some View{
         ZStack{
             if menu{
-            Color.clear
+                Color.clear
                     .background(Material.thin)
                     .colorScheme(.dark)
                 ScrollView(showsIndicators: false){
@@ -236,7 +237,7 @@ struct PhotosView: View {
                             }
                         }
                     }.foregroundColor(.white)
-                    .padding(.vertical,100)
+                        .padding(.vertical,100)
                 }
             }
         }
@@ -330,19 +331,19 @@ struct PhotosView: View {
             ScrollView(.horizontal,showsIndicators: false){
                 if show{
                     HStack{
-                            Button {
-                                photosMode = .all
-                                vm.album = nil
-                                vm.fetchAlbumAssets(from: nil)
-                                if let asset = vm.fetchPhotosFirstAssets(mode:.all){
-                                    vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
-                                }
-                            } label: {
-                                VStack{
-                                    albumCategoryRow(assets: vm.fetchPhotosFirstAssets(mode:.all))
-                                    labelType(text:PhotosFilter.all.rawValue)
-                                }
+                        Button {
+                            photosMode = .all
+                            vm.album = nil
+                            vm.fetchAlbumAssets(from: nil)
+                            if let asset = vm.fetchPhotosFirstAssets(mode:.all){
+                                vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
                             }
+                        } label: {
+                            VStack{
+                                albumCategoryRow(assets: vm.fetchPhotosFirstAssets(mode:.all))
+                                labelType(text:PhotosFilter.all.rawValue)
+                            }
+                        }
                         ForEach(vm.albums, id: \.self) { collection in
                             Button {
                                 photosMode = .other
@@ -382,7 +383,7 @@ struct PhotosView: View {
         }
     }
     
-
+    
     private var imageItemView:some View{
         ZStack{
             Color.reversal
@@ -446,6 +447,11 @@ struct PhotosView: View {
                 if selectedVideo != nil{
                     VideoPlayerView(item: $selectedVideo, offset: $videoOffset)
                         .gesture(videoDrag)
+                    if !info{
+                        infoMenuView
+                            .padding(30)
+                            .matchedGeometryEffect(id: "info", in: namespace)
+                    }
                 }
                 if info{
                     if let selectedAssets{
@@ -470,25 +476,25 @@ struct PhotosView: View {
             HStack{
                 if asset.representsBurst{
                     Text("Burst")
-                    .foregroundColor(.white)
-                    .font(.caption)
-                    .padding(2.5)
-                    .padding(.horizontal,2.5)
-                    .background {
-                        Color.gray.opacity(0.5)
-                            .cornerRadius(2)
-                    }
+                        .foregroundColor(.white)
+                        .font(.caption)
+                        .padding(2.5)
+                        .padding(.horizontal,2.5)
+                        .background {
+                            Color.gray.opacity(0.5)
+                                .cornerRadius(2)
+                        }
                 }
                 if asset.hasAdjustments{
                     Text("Edited")
-                    .foregroundColor(.white)
-                    .font(.caption)
-                    .padding(2.5)
-                    .padding(.horizontal,2.5)
-                    .background {
-                        Color.gray.opacity(0.5)
-                            .cornerRadius(2)
-                    }
+                        .foregroundColor(.white)
+                        .font(.caption)
+                        .padding(2.5)
+                        .padding(.horizontal,2.5)
+                        .background {
+                            Color.gray.opacity(0.5)
+                                .cornerRadius(2)
+                        }
                 }
             }
             HStack{
@@ -545,7 +551,7 @@ struct PhotosView: View {
         }
         .onAppear{
             Task{
-                if let adress = await asset.location?.fetchAddress(){                                    
+                if let adress = await asset.location?.fetchAddress(){
                     self.adress = adress
                 }
             }
@@ -604,10 +610,65 @@ struct PhotosView: View {
         }
         .padding()
     }
+    func fetchImage(from asset: PHAsset, completion: @escaping (UIImage?) -> Void) {
+        let imageManager = PHImageManager.default()
+        let imageRequestOptions = PHImageRequestOptions()
+        imageRequestOptions.isSynchronous = true
+        
+        imageManager.requestImage(for: asset,
+                                  targetSize: CGSize(width: asset.pixelWidth, height: asset.pixelHeight),
+                                  contentMode: .aspectFill,
+                                  options: imageRequestOptions) { image, _ in
+            completion(image)
+        }
+    }
+    
+    // URL로 변환 (비디오)
+    func fetchVideoURL(from asset: PHAsset, completion: @escaping (URL?) -> Void) {
+        let videoManager = PHImageManager.default()
+        let videoRequestOptions = PHVideoRequestOptions()
+        
+        videoManager.requestAVAsset(forVideo: asset, options: videoRequestOptions) { avAsset, audioMix, _ in
+            if let asset = avAsset as? AVURLAsset {
+                completion(asset.url)
+            } else {
+                completion(nil)
+            }
+        }
+    }
+    private func shareMedia(image:UIImage?,videoURL:URL?) {
+        var items: [Any] = []
+        
+        if let image{
+            items.append(image)
+        }
+        
+        if let videoURL {
+            items.append(videoURL)
+        }
+        
+        let activityController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        
+        DispatchQueue.main.async {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                if let rootController = windowScene.windows.first?.rootViewController {
+                        rootController.present(activityController, animated: true, completion: nil)
+                }
+            }
+        }
+    }
     var infoMenuView:some View{
         HStack{
             Button {
-                
+                if let selectedAssets {
+                    fetchImage(from: selectedAssets) { img in
+                        shareMedia(image: img, videoURL: nil)
+                    }
+                } else if let asset = selectedVideo?.asset {
+                    fetchVideoURL(from: asset) { url in
+                        shareMedia(image: nil, videoURL: url)
+                    }
+                }
             } label: {
                 Image(systemName:"square.and.arrow.up")
                     .padding(10)
@@ -785,7 +846,7 @@ struct PhotosView: View {
                     }
                 }
             }
-            
+        
     }
 }
 
@@ -795,6 +856,8 @@ struct PhotosView: View {
 }
 
 struct SizePreferenceKey: PreferenceKey {
-  static var defaultValue: CGSize = .zero
-  static func reduce(value: inout CGSize, nextValue: () -> CGSize) { }
+    static var defaultValue: CGSize = .zero
+    static func reduce(value: inout CGSize, nextValue: () -> CGSize) { }
 }
+
+

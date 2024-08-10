@@ -85,5 +85,31 @@ enum PhotosFilter:String,CaseIterable{
             return PHAssetMediaSubtype.videoHighFrameRate.rawValue
         }
     }
-    
+    var predicate:NSPredicate? {
+        switch self {
+        case .bookmark:
+            return NSPredicate(format: "favorite == YES")
+        case .video:
+            return NSPredicate(format: "mediaType == %d", PHAssetMediaType.video.rawValue)
+        case .photoScreenshot:
+            return NSPredicate(format: "mediaSubtypes == %d", PHAssetMediaSubtype.photoScreenshot.rawValue)
+        case .photoLive:
+            return NSPredicate(format: "mediaSubtypes == %d", PHAssetMediaSubtype.photoLive.rawValue)
+        case .photoHDR:
+            return NSPredicate(format: "mediaSubtypes == %d", PHAssetMediaSubtype.photoHDR.rawValue)
+        case .photoPanorama:
+            return NSPredicate(format: "mediaSubtypes == %d", PHAssetMediaSubtype.photoPanorama.rawValue)
+        case .photoDepthEffect:
+            return NSPredicate(format: "mediaSubtypes == %d", PHAssetMediaSubtype.photoDepthEffect.rawValue)
+        case .videoStreamed:
+            return NSPredicate(format: "mediaSubtypes == %d", PHAssetMediaSubtype.videoStreamed.rawValue)
+        case .videoCinematic:
+            return NSPredicate(format: "mediaSubtypes == %d", PHAssetMediaSubtype.videoCinematic.rawValue)
+        case .videoTimelapse:
+            return NSPredicate(format: "mediaSubtypes == %d", PHAssetMediaSubtype.videoTimelapse.rawValue)
+        case .videoHighFrameRate:
+            return NSPredicate(format: "mediaSubtypes == %d", PHAssetMediaSubtype.videoHighFrameRate.rawValue)
+        default:return nil
+        }
+    }
 }

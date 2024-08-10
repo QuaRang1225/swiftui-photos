@@ -13,5 +13,5 @@ protocol FetchPhoto{
     func fetchAssets()
     func fetchAlbums()
     func fetchImageFromAsset(asset: PHAsset,targetSize:CGSize,completion: @escaping (UIImage?)->())
-    func fetchAlbumAssets(from collection: PHAssetCollection?)
+    func fetchAlbumAssets(from collection: PHAssetCollection?,condition:NSPredicate?)
 }

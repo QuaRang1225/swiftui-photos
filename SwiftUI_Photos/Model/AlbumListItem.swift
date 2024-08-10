@@ -6,3 +6,11 @@
 //
 
 import Foundation
+import Photos
+
+struct AlbumListItem{
+    var id:String
+    var asset:PHAsset?
+    var title:String
+    var collection:PHAssetCollection
+}

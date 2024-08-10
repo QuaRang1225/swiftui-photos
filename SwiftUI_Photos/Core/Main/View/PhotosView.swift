@@ -306,9 +306,9 @@ struct PhotosView: View {
             ratioView.matchedGeometryEffect(id: "ratio", in: namespace)
             Button {
                 withAnimation {
-                    vm.fetchAlbumAssets(from: vm.album?.collection)
-                    self.photosMode = self.photosModefilter
                     vm.isAsscending.toggle()
+                    vm.fetchAlbumAssets(from: vm.album?.collection, condition: photosMode.predicate)
+                    vm.fetchAlbums()
                     show = false
                 }
             } label: {
@@ -342,7 +342,7 @@ struct PhotosView: View {
                         Button {
                             photosMode = .all
                             vm.album = nil
-                            vm.fetchAlbumAssets(from: nil)
+                            vm.fetchAlbumAssets(from: nil, condition: nil)
                             if let asset = vm.fetchPhotosFirstAssets(mode:.all){
                                 vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
                             }
@@ -356,7 +356,7 @@ struct PhotosView: View {
                             Button {
                                 photosMode = .other
                                 vm.album = album
-                                vm.fetchAlbumAssets(from: album.collection)
+                                vm.fetchAlbumAssets(from: album.collection, condition: nil)
                                 if let asset = vm.fetchAlbumsFirstAssets(collection: album.collection){
                                     vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
                                 }else{

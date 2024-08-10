@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 import Photos
+import Combine
 
 class PhotoViewModel: ObservableObject,FetchPhoto {
     
@@ -20,11 +21,13 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
     @Published var albums:[AlbumListItem] = []
     
     @Published var isAsscending = false
+    @Published var isFilter = false
     
     private let group = DispatchGroup()
     private let userInteractiveQueue = DispatchQueue.global(qos: .userInteractive)
     private let fetchAlbumAssetQueue = DispatchQueue.global(qos: .userInteractive)
     private let mainQueue = DispatchQueue.main
+    
     
     init() {
         fetchAssets()
@@ -34,7 +37,7 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
         PHPhotoLibrary.requestAuthorization(for: .readWrite){ status in
             switch status{
             case .authorized:
-                self.fetchAlbumAssets(from: nil)
+                self.fetchAlbumAssets(from: nil, condition: nil)
             default:
                 self.accessDenied = true
             }
@@ -54,12 +57,15 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
         }
     }
     
-    func fetchAlbumAssets(from collection: PHAssetCollection?) {
+    func fetchAlbumAssets(from collection: PHAssetCollection?,condition:NSPredicate?) {
         self.progress = true
         //필터링,정렬 등 받아온 결괏값의 옵션을 부여할 수 있는 클래스
         let fetchOptions = PHFetchOptions()
         //날짜 순으로 내림차순
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: isAsscending)]
+        if let condition{
+            fetchOptions.predicate = condition
+        }
         //Assets(항목)을 받아오는 메서드 (PHFetchResult 클래스 타입)
         var assets = PHFetchResult<PHAsset>()
         if let collection{

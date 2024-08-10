@@ -42,35 +42,8 @@ struct PhotosView: View {
     @State var adress:(country:String?, city:String?,district:String?)?
     @State var isMap = false
     
-    
-    var imageList:[PHAsset]{
-        switch photosMode{
-        case .all,.other:
-            return vm.assets
-        case .bookmark:
-            return vm.assets.filter({$0.isFavorite})
-        case .video:
-            return vm.assets.filter{$0.mediaType == .video}
-        case .photoScreenshot:
-            return vm.assets.filter{ $0.mediaSubtypes == .photoScreenshot }
-        case .photoLive:
-            return vm.assets.filter{ $0.mediaSubtypes == .photoLive }
-        case .photoHDR:
-            return vm.assets.filter{ $0.mediaSubtypes == .photoHDR }
-        case .photoPanorama:
-            return vm.assets.filter{ $0.mediaSubtypes == .photoPanorama }
-        case .photoDepthEffect:
-            return vm.assets.filter{ $0.mediaSubtypes == .photoDepthEffect }
-        case .videoStreamed:
-            return vm.assets.filter{ $0.mediaSubtypes == .videoStreamed }
-        case .videoCinematic:
-            return vm.assets.filter{ $0.mediaSubtypes == .videoCinematic }
-        case .videoTimelapse:
-            return vm.assets.filter{ $0.mediaSubtypes == .videoTimelapse }
-        case .videoHighFrameRate:
-            return vm.assets.filter{ $0.mediaSubtypes == .videoHighFrameRate }
-        }
-    }
+    @State var isFavorite = false
+  
     var body: some View {
         ZStack{
             imageListView
@@ -96,6 +69,33 @@ struct PhotosView: View {
             }
             size = CGSize(width: width()/numberOfColumns, height: width()/numberOfColumns)
         }
+        .onChange(of: self.photosMode) { value in
+            switch value{
+            case .all,.other: break
+            case .bookmark:
+                vm.assetList = vm.assets.filter({$0.isFavorite})
+            case .video:
+                vm.assetList = vm.assets.filter{$0.mediaType == .video}
+            case .photoScreenshot:
+                vm.assetList = vm.assets.filter{ $0.mediaSubtypes == .photoScreenshot }
+            case .photoLive:
+                vm.assetList = vm.assets.filter{ $0.mediaSubtypes == .photoLive }
+            case .photoHDR:
+                vm.assetList = vm.assets.filter{ $0.mediaSubtypes == .photoHDR }
+            case .photoPanorama:
+                vm.assetList = vm.assets.filter{ $0.mediaSubtypes == .photoPanorama }
+            case .photoDepthEffect:
+                vm.assetList = vm.assets.filter{ $0.mediaSubtypes == .photoDepthEffect }
+            case .videoStreamed:
+                vm.assetList = vm.assets.filter{ $0.mediaSubtypes == .videoStreamed }
+            case .videoCinematic:
+                vm.assetList = vm.assets.filter{ $0.mediaSubtypes == .videoCinematic }
+            case .videoTimelapse:
+                vm.assetList = vm.assets.filter{ $0.mediaSubtypes == .videoTimelapse }
+            case .videoHighFrameRate:
+                vm.assetList = vm.assets.filter{ $0.mediaSubtypes == .videoHighFrameRate }
+            }
+        }
     }
     var imageListView:some View{
         ScrollView {
@@ -120,7 +120,7 @@ struct PhotosView: View {
                 }
                 .frame(height: 1)
                 LazyVGrid(columns:assetsItems,spacing: 0){
-                    ForEach(imageList, id: \.self) { asset in
+                    ForEach(vm.assetList, id: \.self) { asset in
                         PhotosItemView(assets: asset)
                             .background(Color.white)
                             .aspectRatio(contentMode: isFill ? .fill : .fit)
@@ -130,12 +130,17 @@ struct PhotosView: View {
                             .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
                             .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
                             .overlay(alignment:.bottomTrailing){
-                                if asset.mediaType == .video{
-                                    Text(asset.duration.timeFormatter())
-                                        .foregroundColor(.white)
-                                        .shadow(radius: 1)
-                                        .padding(2)
+                                HStack{
+                                    if asset.isFavorite{
+                                        Image(systemName: "heart.fill")
+                                    }
+                                    if asset.mediaType == .video{
+                                        Text(asset.duration.timeFormatter())
+                                    }
                                 }
+                                .foregroundColor(.white)
+                                .shadow(color:.black.opacity(0.5),radius: 1)
+                                .padding(4)
                             }
                             .onTapGesture {
                                 switch asset.mediaType{
@@ -187,13 +192,11 @@ struct PhotosView: View {
             VStack(alignment: .leading){
                 Text(photosMode == .other ? vm.album?.localizedTitle ?? "" : photosMode.rawValue)
                     .font(.largeTitle)
-                Text("\(imageList.count)개의 항목")
+                Text("\(vm.assetList.count)개의 항목")
             }
             .foregroundStyle(.white)
-            
             .bold()
             Spacer()
-            
         }
         .padding()
         
@@ -438,20 +441,27 @@ struct PhotosView: View {
                         }
                     }
                     .coordinateSpace(name: "G")
+                    .onAppear{
+                        isFavorite = selectedAssets.isFavorite
+                    }
                     if !info{
                         infoMenuView
                             .padding(30)
                             .matchedGeometryEffect(id: "info", in: namespace)
                     }
                 }
-                if selectedVideo != nil{
+                if let selectedVideo{
                     VideoPlayerView(item: $selectedVideo, offset: $videoOffset)
                         .gesture(videoDrag)
+                        .onAppear{
+                            isFavorite = selectedVideo.asset.isFavorite
+                        }
                     if !info{
                         infoMenuView
                             .padding(30)
                             .matchedGeometryEffect(id: "info", in: namespace)
                     }
+                    
                 }
                 if info{
                     if let selectedAssets{
@@ -652,7 +662,7 @@ struct PhotosView: View {
         DispatchQueue.main.async {
             if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
                 if let rootController = windowScene.windows.first?.rootViewController {
-                        rootController.present(activityController, animated: true, completion: nil)
+                    rootController.present(activityController, animated: true, completion: nil)
                 }
             }
         }
@@ -682,9 +692,44 @@ struct PhotosView: View {
             Spacer()
             HStack{
                 Button {
+                    if let selectedAssets {
+                        DispatchQueue.global().async {
+                            vm.assetavorite(asset: selectedAssets,isFavorite:isFavorite){ asset,favorite  in
+                                isFavorite = favorite
+                                if let index = vm.assetList.firstIndex(where: {$0 == selectedAssets}),let asset{
+                                    DispatchQueue.main.async {
+                                        if photosMode == .bookmark{
+                                            vm.assetList = vm.assetList.filter{$0 != asset}
+                                        }else{
+                                            vm.assetList[index] = asset
+                                        }
+                                        vm.assets = vm.assetList
+                                        
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    if let asset = selectedVideo?.asset {
+                        DispatchQueue.global().async {
+                            vm.assetavorite(asset: asset,isFavorite:isFavorite){ asset,favorite  in
+                                isFavorite = favorite
+                                if let index = vm.assetList.firstIndex(where: {$0 == asset}),let asset{
+                                    DispatchQueue.main.async {
+                                        if photosMode == .bookmark{
+                                            vm.assetList = vm.assetList.filter{$0 != asset}
+                                        }else{
+                                            vm.assetList[index] = asset
+                                        }
+                                        vm.assets = vm.assetList
+                                    }
+                                }
+                            }
+                        }
+                    }
                     
                 } label: {
-                    Image(systemName:"heart")
+                    Image(systemName:isFavorite ? "heart.fill" : "heart")
                 }
                 .padding(.trailing,30)
                 Button {

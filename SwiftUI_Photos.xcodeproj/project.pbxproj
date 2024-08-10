@@ -33,6 +33,7 @@
 		D6ABD3342C66F32000ADA099 /* Date.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ABD3332C66F32000ADA099 /* Date.swift */; };
 		D6ABD3362C66FA6A00ADA099 /* Int.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ABD3352C66FA6A00ADA099 /* Int.swift */; };
 		D6ABD3382C670C8000ADA099 /* CLLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ABD3372C670C8000ADA099 /* CLLocation.swift */; };
+		D6BBCCF12C67D67C002BDCA8 /* AlbumListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BBCCF02C67D67C002BDCA8 /* AlbumListItem.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -83,6 +84,7 @@
 		D6ABD3332C66F32000ADA099 /* Date.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Date.swift; sourceTree = "<group>"; };
 		D6ABD3352C66FA6A00ADA099 /* Int.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Int.swift; sourceTree = "<group>"; };
 		D6ABD3372C670C8000ADA099 /* CLLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLLocation.swift; sourceTree = "<group>"; };
+		D6BBCCF02C67D67C002BDCA8 /* AlbumListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumListItem.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -244,6 +246,7 @@
 			isa = PBXGroup;
 			children = (
 				D60A53A72C6402E0001F73F2 /* VideoPlayerItem.swift */,
+				D6BBCCF02C67D67C002BDCA8 /* AlbumListItem.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -415,6 +418,7 @@
 				D6ABD3362C66FA6A00ADA099 /* Int.swift in Sources */,
 				D60A53A82C6402E0001F73F2 /* VideoPlayerItem.swift in Sources */,
 				D6ABD32A2C664D5C00ADA099 /* LocationMapView.swift in Sources */,
+				D6BBCCF12C67D67C002BDCA8 /* AlbumListItem.swift in Sources */,
 				D6ABD32C2C66905F00ADA099 /* MediaTypeFilter.swift in Sources */,
 				D60A53922C623FFA001F73F2 /* PhotoViewModel.swift in Sources */,
 				D6ABD3302C66E85D00ADA099 /* SourceTypeFilter.swift in Sources */,

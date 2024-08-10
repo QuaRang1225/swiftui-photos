@@ -23,6 +23,7 @@ struct PhotosView: View {
     
     @State var show = true
     @State var photosMode:PhotosFilter = .all
+    @State var photosModefilter:PhotosFilter = .all
     @State private var mainOffsetY: CGFloat = .zero
     @State private var lastminY: CGFloat = .zero
     
@@ -43,7 +44,7 @@ struct PhotosView: View {
     @State var isMap = false
     
     @State var isFavorite = false
-  
+    
     var body: some View {
         ZStack{
             imageListView
@@ -143,6 +144,7 @@ struct PhotosView: View {
                                 .padding(4)
                             }
                             .onTapGesture {
+                                vm.progress = true
                                 switch asset.mediaType{
                                 case .image:
                                     withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
@@ -190,7 +192,7 @@ struct PhotosView: View {
     var headerView:some View{
         HStack(alignment: .top){
             VStack(alignment: .leading){
-                Text(photosMode == .other ? vm.album?.localizedTitle ?? "" : photosMode.rawValue)
+                Text(photosMode == .other ? vm.album?.title ?? "알 수 없음" : photosMode.rawValue)
                     .font(.largeTitle)
                 Text("\(vm.assetList.count)개의 항목")
             }
@@ -216,6 +218,7 @@ struct PhotosView: View {
                         ForEach(filter.filter{$0.type == .photo},id: \.self){ filter in
                             Button {
                                 self.photosMode = filter
+                                self.photosModefilter = filter
                                 menu = false
                             } label: {
                                 HStack{
@@ -230,6 +233,7 @@ struct PhotosView: View {
                         ForEach(filter.filter{$0.type == .video},id: \.self){ filter in
                             Button {
                                 self.photosMode = filter
+                                self.photosModefilter = filter
                                 menu = false
                             } label: {
                                 HStack{
@@ -302,8 +306,9 @@ struct PhotosView: View {
             ratioView.matchedGeometryEffect(id: "ratio", in: namespace)
             Button {
                 withAnimation {
+                    vm.fetchAlbumAssets(from: vm.album?.collection)
+                    self.photosMode = self.photosModefilter
                     vm.isAsscending.toggle()
-                    vm.fetchAlbumAssets(from: vm.album)
                     show = false
                 }
             } label: {
@@ -347,20 +352,20 @@ struct PhotosView: View {
                                 labelType(text:PhotosFilter.all.rawValue)
                             }
                         }
-                        ForEach(vm.albums, id: \.self) { collection in
+                        ForEach(vm.albums,id: \.id) { album in
                             Button {
                                 photosMode = .other
-                                vm.album = collection
-                                vm.fetchAlbumAssets(from: collection)
-                                if let asset = vm.fetchAlbumsFirstAssets(collection: collection){
+                                vm.album = album
+                                vm.fetchAlbumAssets(from: album.collection)
+                                if let asset = vm.fetchAlbumsFirstAssets(collection: album.collection){
                                     vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
                                 }else{
                                     self.image = nil
                                 }
                             } label: {
                                 VStack{
-                                    albumCategoryRow(assets: vm.fetchAlbumsFirstAssets(collection: collection))
-                                    labelType(text: collection.localizedTitle ?? "")
+                                    albumCategoryRow(assets: album.asset)
+                                    labelType(text: album.title)
                                 }
                             }
                         }
@@ -443,6 +448,7 @@ struct PhotosView: View {
                     .coordinateSpace(name: "G")
                     .onAppear{
                         isFavorite = selectedAssets.isFavorite
+                        vm.progress = false
                     }
                     if !info{
                         infoMenuView
@@ -455,6 +461,7 @@ struct PhotosView: View {
                         .gesture(videoDrag)
                         .onAppear{
                             isFavorite = selectedVideo.asset.isFavorite
+                            vm.progress = false
                         }
                     if !info{
                         infoMenuView
@@ -698,13 +705,14 @@ struct PhotosView: View {
                                 isFavorite = favorite
                                 if let index = vm.assetList.firstIndex(where: {$0 == selectedAssets}),let asset{
                                     DispatchQueue.main.async {
-                                        if photosMode == .bookmark{
-                                            vm.assetList = vm.assetList.filter{$0 != asset}
-                                        }else{
-                                            vm.assetList[index] = asset
+                                        withAnimation {
+                                            if photosMode == .bookmark{
+                                                vm.assetList = vm.assetList.filter{$0 != asset}
+                                            }else{
+                                                vm.assetList[index] = asset
+                                            }
+                                            vm.assets = vm.assetList
                                         }
-                                        vm.assets = vm.assetList
-                                        
                                     }
                                 }
                             }
@@ -716,12 +724,15 @@ struct PhotosView: View {
                                 isFavorite = favorite
                                 if let index = vm.assetList.firstIndex(where: {$0 == asset}),let asset{
                                     DispatchQueue.main.async {
-                                        if photosMode == .bookmark{
-                                            vm.assetList = vm.assetList.filter{$0 != asset}
-                                        }else{
-                                            vm.assetList[index] = asset
+                                        withAnimation {
+                                            if photosMode == .bookmark{
+                                                vm.assetList = vm.assetList.filter{$0 != asset}
+                                            }else{
+                                                vm.assetList[index] = asset
+                                            }
+                                            vm.assets = vm.assetList
                                         }
-                                        vm.assets = vm.assetList
+                                       
                                     }
                                 }
                             }
@@ -755,7 +766,32 @@ struct PhotosView: View {
             
             Spacer()
             Button {
-                
+                if let selectedAssets {
+                    vm.deleteAssetLibrary(asset: selectedAssets) { asset in
+                        DispatchQueue.main.async {
+                            withAnimation {
+                                vm.assetList = vm.assetList.filter{$0 != asset}
+                                vm.assets = vm.assetList
+                                self.selectedAssets = nil
+                                self.show = false
+                                vm.fetchAlbums()
+                            }
+                        }
+                    }
+                }
+                if let asset = selectedVideo?.asset {
+                    vm.deleteAssetLibrary(asset: asset) { asset in
+                        DispatchQueue.main.async {
+                            withAnimation {
+                                vm.assetList = vm.assetList.filter{$0 != asset}
+                                vm.assets = vm.assetList
+                                self.selectedVideo = nil
+                                self.show = false
+                                vm.fetchAlbums()
+                            }
+                        }
+                    }
+                }
             } label: {
                 Image(systemName:"trash")
                     .padding(10)

@@ -36,6 +36,11 @@ struct PhotosView: View {
     @State var endScale:CGFloat = 1
     @GestureState var changed = false
     
+    @State var info = false
+    @State var videoOffset:CGSize = .zero
+    
+    @State var adress:(country:String?, city:String?,district:String?)?
+    
     var imageList:[PHAsset]{
         switch photosMode{
         case .all,.other:
@@ -116,6 +121,7 @@ struct PhotosView: View {
                             .overlay(alignment:.bottomTrailing){
                                 if asset.mediaType == .video{
                                     Text(asset.duration.timeFormatter())
+                                        .foregroundColor(.white)
                                         .shadow(radius: 1)
                                         .padding(2)
                                 }
@@ -187,7 +193,8 @@ struct PhotosView: View {
         ZStack{
             if menu{
             Color.clear
-                .background(Material.thin)
+                    .background(Material.thin)
+                    .colorScheme(.dark)
                 ScrollView(showsIndicators: false){
                     VStack{
                         let filter = PhotosFilter.allCases.filter{$0 != .all && $0 != .other}
@@ -365,67 +372,165 @@ struct PhotosView: View {
         }
     }
     
-    @ViewBuilder
+
     private var imageItemView:some View{
-        Color.reversal
-            .overlay(Color.gray.opacity(0.2))
-            .ignoresSafeArea()
-            .opacity((selectedAssets == nil && selectedVideo == nil ) ? 0 : min(1, max(0, 1 - Double(position.height / 800))))
-        if let selectedAssets {
-            GeometryReader{ geo in
-                let g = geo.frame(in: .named("G"))
-                PhotosItemView(assets: selectedAssets)
-                    .scaledToFit()
-                    .frame(maxWidth: .infinity,maxHeight: .infinity)
-                    .matchedGeometryEffect(id: selectedAssets.localIdentifier, in: namespace)
-                    .onChange(of: changed) { change in
-                        withAnimation(.easeIn(duration: 0.1)){
-                            if g.minX > 0{
-                                currentOffset.width = currentOffset.width - g.minX
-                            }
-                            if g.minY > 0{
-                                currentOffset.height = currentOffset.height - g.minY
-                                if mainCurrentScale == 1{
-                                    self.selectedAssets = nil
+        ZStack{
+            Color.reversal
+                .overlay(Color.gray.opacity(0.2))
+                .ignoresSafeArea()
+                .opacity((selectedAssets == nil && selectedVideo == nil ) ? 0 : min(1, max(0, 1 - Double(position.height / 800))))
+            VStack{
+                if let selectedAssets {
+                    GeometryReader{ geo in
+                        let g = geo.frame(in: .named("G"))
+                        PhotosItemView(assets: selectedAssets)
+                            .scaledToFit()
+                            .frame(maxWidth: .infinity,maxHeight: .infinity)
+                            .matchedGeometryEffect(id: selectedAssets.localIdentifier, in: namespace)
+                            .onChange(of: changed) { change in
+                                withAnimation(.easeIn(duration: 0.1)){
+                                    if g.minX > 0{
+                                        currentOffset.width = currentOffset.width - g.minX
+                                    }
+                                    if g.minY > 0{
+                                        currentOffset.height = currentOffset.height - g.minY
+                                    }
+                                    if g.maxX < width(){
+                                        currentOffset.width = g.minX - currentOffset.width
+                                    }
+                                    if g.maxY < width(){
+                                        currentOffset.height = g.minY - currentOffset.height
+                                    }
+                                    if !change{
+                                        endOffset = currentOffset
+                                    }
                                 }
                             }
-                            if g.maxX < width(){
-                                currentOffset.width = g.minX - currentOffset.width
-                            }
-                            if g.maxY < width(){
-                                currentOffset.height = g.minY - currentOffset.height
-                            }
-                            if !change{
-                                endOffset = currentOffset
+                    }
+                    .scaleEffect(mainCurrentScale)
+                    .offset(currentOffset)
+                    .simultaneousGesture(drag)
+                    .simultaneousGesture(pinch)
+                    .onTapGesture(count: 2) { // 더블 탭 감지
+                        withAnimation {
+                            if mainCurrentScale == 1{
+                                mainCurrentScale = 2
+                                endScale = 2
+                            }else{
+                                mainCurrentScale = 1
+                                endScale = 1
+                                currentOffset = .zero
+                                endOffset = .zero
                             }
                         }
                     }
-            }
-            .scaleEffect(mainCurrentScale)
-            .offset(currentOffset)
-            .frame(height: height()/1.3)
-            .simultaneousGesture(drag)
-            .simultaneousGesture(pinch)
-            .onTapGesture(count: 2) { // 더블 탭 감지
-                withAnimation {
-                    if mainCurrentScale == 1{
-                        mainCurrentScale = 2
-                        endScale = 2
-                    }else{
-                        mainCurrentScale = 1
-                        endScale = 1
-                        currentOffset = .zero
-                        endOffset = .zero
+                    .coordinateSpace(name: "G")
+                }
+                if selectedVideo != nil{
+                    VideoPlayerView(item: $selectedVideo, offset: $videoOffset)
+                        .gesture(videoDrag)
+                }
+                if info{
+                    if let selectedAssets{
+                        infoView(asset:selectedAssets)
+                    }
+                    else if let selectedVideo{
+                        infoView(asset:selectedVideo.asset)
                     }
                 }
             }
-            .coordinateSpace(name: "G")
-        }
-        if selectedVideo != nil{
-            VideoPlayerView(item: $selectedVideo)
         }
     }
-    
+    func infoView(asset:PHAsset) -> some View{
+        VStack(alignment:.leading,spacing:10){
+            Text("\(MediaTypeFilter.allCases.first(where: {$0.code == asset.mediaType.rawValue})?.rawValue ?? "")")
+                .font(.title2)
+                .bold()
+                .padding(.bottom,5)
+            Text("\(asset.localIdentifier)").opacity(0.5)
+            HStack{
+                if asset.representsBurst{
+                    Text("Burst")
+                    .foregroundColor(.white)
+                    .font(.caption)
+                    .padding(2.5)
+                    .padding(.horizontal,2.5)
+                    .background {
+                        Color.gray.opacity(0.5)
+                            .cornerRadius(2)
+                    }
+                }
+                if asset.hasAdjustments{
+                    Text("Edited")
+                    .foregroundColor(.white)
+                    .font(.caption)
+                    .padding(2.5)
+                    .padding(.horizontal,2.5)
+                    .background {
+                        Color.gray.opacity(0.5)
+                            .cornerRadius(2)
+                    }
+                }
+            }
+            HStack{
+                Text("출처").bold()
+                Spacer()
+                Text("\(asset.pixelWidth.removeCommas()) x \(asset.pixelHeight.removeCommas())")
+                    .opacity(0.5)
+                Text("\(SourceTypeFilter.allCases.first(where: {$0.code == asset.sourceType.rawValue})?.rawValue ?? "")")
+            }
+            .padding(.bottom)
+            HStack{
+                Text("원본").bold()
+                Spacer()
+                Text("\(asset.creationDate.formattedDate())")
+            }
+            HStack{
+                Text("수정").bold()
+                Spacer()
+                Text("\(asset.modificationDate.formattedDate())")
+            }
+            if let adress{
+                VStack(spacing: 0){
+                    LocationMapView()
+                        .frame(height: 100)
+                        .allowsHitTesting(false)
+                    HStack{
+                        if let c = adress.city,let d = adress.district{
+                            Text("\(c) - \(d)").foregroundColor(.blue)
+                        }else{
+                            Text("미확인 구역").foregroundColor(.blue)
+                        }
+                        Image(systemName: "chevron.right").foregroundColor(.gray.opacity(0.5))
+                        Spacer()
+                    }
+                    .font(.subheadline)
+                    .padding(10)
+                    .background(Color.gray.opacity(0.5))
+                }
+                .cornerRadius(5)
+            }
+        }
+        .padding()
+        .background{
+            Color.reversal
+            Color.gray.opacity(0.2)
+        }
+        .onAppear{
+            Task{
+                if let adress = await asset.location?.fetchAddress(){                                    
+                    self.adress = adress
+                }
+            }
+        }
+        .gesture(DragGesture().onEnded({ gesture in
+            if gesture.translation.height > 0{
+                withAnimation {
+                    self.info = false
+                }
+            }
+        }))
+    }
     private var gridAdjustmenGesture:some Gesture{
         MagnificationGesture()
             .onChanged { value in
@@ -474,20 +579,63 @@ struct PhotosView: View {
             DispatchQueue.main.async {
                 withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
                     if let playerItem {
-                        selectedVideo = VideoPlayerItem(id: id, playerItem: AVPlayer(playerItem: playerItem))
+                        selectedVideo = VideoPlayerItem(id: id, asset: asset, playerItem: AVPlayer(playerItem: playerItem))
                     }
                 }
             }
         }
     }
-    
+    var videoDrag:some Gesture{
+        DragGesture()
+            .onChanged { gesture in
+                if gesture.translation.height < 20{
+                    withAnimation {
+                        self.info = true
+                    }
+                }
+            }
+            .onEnded { gesture in
+                if gesture.translation.height > 20{
+                    withAnimation {
+                        if info{
+                            self.info = false
+                        }else{
+                            self.selectedVideo = nil
+                        }
+                    }
+                }
+            }
+    }
     var drag:some Gesture{
         DragGesture()
             .updating($changed){ _,changed,_ in
-                changed = true
+                if mainCurrentScale != 1{
+                    changed = true
+                }
             }
             .onChanged{ gesture in
-                currentOffset = endOffset + gesture.translation
+                if mainCurrentScale != 1{
+                    currentOffset = endOffset + gesture.translation
+                }else{
+                    if gesture.translation.height < 0{
+                        withAnimation {
+                            self.info = true
+                        }
+                    }
+                }
+            }
+            .onEnded { gesture in
+                if mainCurrentScale == 1{
+                    if gesture.translation.height > 0{
+                        withAnimation {
+                            if info{
+                                self.info = false
+                            }else{
+                                self.selectedAssets = nil
+                            }
+                        }
+                    }
+                }
             }
     }
     var pinch:some Gesture{
@@ -502,10 +650,10 @@ struct PhotosView: View {
                 withAnimation(.easeIn(duration: 0.1)){
                     endScale = min(max(endScale + gesture - 1, 1), 3)
                     if endScale < 1 {
-                        mainCurrentScale = 1 // 스케일을 기본 값 1로 리셋
-                        endScale = 1 // 스케일을 기본 값 1로 리셋
-                        currentOffset = .zero // 오프셋을 기본 값으로 리셋
-                        endOffset = .zero // 오프셋을 기본 값으로 리셋
+                        mainCurrentScale = 1
+                        endScale = 1
+                        currentOffset = .zero
+                        endOffset = .zero
                     }
                 }
             }
@@ -516,4 +664,9 @@ struct PhotosView: View {
 #Preview {
     PhotosView()
         .environmentObject(PhotoViewModel())
+}
+
+struct SizePreferenceKey: PreferenceKey {
+  static var defaultValue: CGSize = .zero
+  static func reduce(value: inout CGSize, nextValue: () -> CGSize) { }
 }

@@ -40,6 +40,7 @@ struct PhotosView: View {
     @State var videoOffset:CGSize = .zero
     
     @State var adress:(country:String?, city:String?,district:String?)?
+    @State var isMap = false
     
     var imageList:[PHAsset]{
         switch photosMode{
@@ -79,6 +80,15 @@ struct PhotosView: View {
         .progress(vm.progress)
         .userAllowAccessAlbum(vm.accessDenied)
         .gesture(gridAdjustmenGesture)
+        .fullScreenCover(isPresented: $isMap){
+            if let adress,let ci = adress.city,let co = adress.country,let di = adress.district{
+                if let selectedAssets{
+                    LocationMapView(buttonMode: false, annotions:  [City(asset: selectedAssets, country:co, city: ci, district: di, coordinate: selectedAssets.location ?? CLLocation(latitude: 1, longitude: 1))], dismiss: $isMap)
+                }else if let asset = selectedVideo?.asset{
+                    LocationMapView(buttonMode: false, annotions:  [City(asset: asset, country:co, city: ci, district: di, coordinate: asset.location ?? CLLocation(latitude: 1, longitude: 1))], dismiss: $isMap)
+                }
+            }
+        }
         .onAppear{
             if let asset = vm.fetchPhotosFirstAssets(mode:.all){
                 vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
@@ -473,13 +483,11 @@ struct PhotosView: View {
                 }
             }
             HStack{
-                Text("출처").bold()
                 Spacer()
                 Text("\(asset.pixelWidth.removeCommas()) x \(asset.pixelHeight.removeCommas())")
                     .opacity(0.5)
                 Text("\(SourceTypeFilter.allCases.first(where: {$0.code == asset.sourceType.rawValue})?.rawValue ?? "")")
             }
-            .padding(.bottom)
             HStack{
                 Text("원본").bold()
                 Spacer()
@@ -490,25 +498,29 @@ struct PhotosView: View {
                 Spacer()
                 Text("\(asset.modificationDate.formattedDate())")
             }
-            if let adress{
-                VStack(spacing: 0){
-                    LocationMapView()
-                        .frame(height: 100)
-                        .allowsHitTesting(false)
-                    HStack{
-                        if let c = adress.city,let d = adress.district{
-                            Text("\(c) - \(d)").foregroundColor(.blue)
-                        }else{
-                            Text("미확인 구역").foregroundColor(.blue)
+            if let adress,let ci = adress.city,let co = adress.country,let di = adress.district{
+                Button {
+                    isMap = true
+                } label: {
+                    VStack(spacing: 0){
+                        LocationMapView(buttonMode: true, annotions: [City(asset: asset, country:co, city: ci, district: di, coordinate: asset.location ?? CLLocation(latitude: 1, longitude: 1))], dismiss: .constant(false))
+                            .frame(height: 150)
+                            .allowsHitTesting(false)
+                        HStack{
+                            if let c = adress.city,let d = adress.district{
+                                Text("\(c) - \(d)").foregroundColor(.blue)
+                            }else{
+                                Text("미확인 구역").foregroundColor(.blue)
+                            }
+                            Image(systemName: "chevron.right").foregroundColor(.gray.opacity(0.5))
+                            Spacer()
                         }
-                        Image(systemName: "chevron.right").foregroundColor(.gray.opacity(0.5))
-                        Spacer()
+                        .font(.subheadline)
+                        .padding(10)
+                        .background(Color.gray.opacity(0.5))
                     }
-                    .font(.subheadline)
-                    .padding(10)
-                    .background(Color.gray.opacity(0.5))
+                    .cornerRadius(5)
                 }
-                .cornerRadius(5)
             }
         }
         .padding()

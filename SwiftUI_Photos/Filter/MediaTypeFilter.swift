@@ -7,7 +7,14 @@
 
 import Foundation
 
-enum MediaTypeFilter{
-    case photo
-    case video
+enum MediaTypeFilter:String,CaseIterable{
+    case photo = "사진"
+    case video = "비디오"
+    
+    var code:Int{
+        switch self{
+        case .photo:1
+        case .video:2
+        }
+    }
 }

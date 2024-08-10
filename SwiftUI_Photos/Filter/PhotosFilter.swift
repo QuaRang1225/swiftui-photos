@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Photos
 
 enum PhotosFilter:String,CaseIterable{
     case all = "전체 항목"
@@ -60,4 +61,29 @@ enum PhotosFilter:String,CaseIterable{
             return "questionmark"
         }
     }
+    var code:UInt{
+        switch self{
+        case .all,.bookmark,.other, .video:
+            return 0
+        case .photoScreenshot:
+            return PHAssetMediaSubtype.photoScreenshot.rawValue
+        case .photoLive:
+            return PHAssetMediaSubtype.photoLive.rawValue
+        case .photoHDR:
+            return PHAssetMediaSubtype.photoHDR.rawValue
+        case .photoPanorama:
+            return PHAssetMediaSubtype.photoPanorama.rawValue
+        case .photoDepthEffect:
+            return PHAssetMediaSubtype.photoDepthEffect.rawValue
+        case .videoStreamed:
+            return PHAssetMediaSubtype.videoStreamed.rawValue
+        case .videoCinematic:
+            return PHAssetMediaSubtype.videoCinematic.rawValue
+        case .videoTimelapse:
+            return PHAssetMediaSubtype.videoTimelapse.rawValue
+        case .videoHighFrameRate:
+            return PHAssetMediaSubtype.videoHighFrameRate.rawValue
+        }
+    }
+    
 }

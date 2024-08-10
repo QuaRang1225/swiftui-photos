@@ -688,9 +688,11 @@ struct PhotosView: View {
                 }
                 .padding(.trailing,30)
                 Button {
-                    
+                    withAnimation {
+                        info.toggle()
+                    }
                 } label: {
-                    Image(systemName:"info.circle")
+                    Image(systemName:!info ? "info.circle" : "info.circle.fill")
                 }
                 Button {
                     

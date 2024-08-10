@@ -386,10 +386,12 @@ struct PhotosView: View {
     private var imageItemView:some View{
         ZStack{
             Color.reversal
-                .overlay(Color.gray.opacity(0.2))
                 .ignoresSafeArea()
                 .opacity((selectedAssets == nil && selectedVideo == nil ) ? 0 : min(1, max(0, 1 - Double(position.height / 800))))
             VStack{
+                if !info{
+                    infoTextView
+                }
                 if let selectedAssets {
                     GeometryReader{ geo in
                         let g = geo.frame(in: .named("G"))
@@ -435,6 +437,11 @@ struct PhotosView: View {
                         }
                     }
                     .coordinateSpace(name: "G")
+                    if !info{
+                        infoMenuView
+                            .padding(30)
+                            .matchedGeometryEffect(id: "info", in: namespace)
+                    }
                 }
                 if selectedVideo != nil{
                     VideoPlayerView(item: $selectedVideo, offset: $videoOffset)
@@ -448,9 +455,11 @@ struct PhotosView: View {
                         infoView(asset:selectedVideo.asset)
                     }
                 }
+                
             }
         }
     }
+    
     func infoView(asset:PHAsset) -> some View{
         VStack(alignment:.leading,spacing:10){
             Text("\(MediaTypeFilter.allCases.first(where: {$0.code == asset.mediaType.rawValue})?.rawValue ?? "")")
@@ -522,11 +531,17 @@ struct PhotosView: View {
                     .cornerRadius(5)
                 }
             }
+            if info{
+                infoMenuView
+                    .matchedGeometryEffect(id: "info", in: namespace)
+            }
         }
         .padding()
         .background{
-            Color.reversal
-            Color.gray.opacity(0.2)
+            VStack(spacing:0){
+                Divider()
+                Color.gray.opacity(0.1).ignoresSafeArea()
+            }.shadow(radius: 10)
         }
         .onAppear{
             Task{
@@ -542,6 +557,107 @@ struct PhotosView: View {
                 }
             }
         }))
+    }
+    var infoTextView:some View{
+        HStack{
+            if let selectedAssets{
+                VStack(alignment: .leading){
+                    let date = selectedAssets.creationDate.formattedTitleDate()
+                    Text(date.date)
+                        .font(.title)
+                    Text(date.time)
+                        .font(.subheadline)
+                        .opacity(0.8)
+                }.bold()
+                Spacer()
+                Button {
+                    withAnimation {
+                        self.selectedAssets = nil
+                    }
+                    
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title)
+                        .foregroundColor(.primary)
+                }
+            }
+            if let asset = selectedVideo?.asset{
+                VStack(alignment: .leading){
+                    let date = asset.creationDate.formattedTitleDate()
+                    Text(date.date)
+                        .font(.title)
+                    Text(date.time)
+                        .font(.subheadline)
+                        .opacity(0.8)
+                }.bold()
+                Spacer()
+                Button {
+                    withAnimation {
+                        self.selectedVideo = nil
+                    }
+                } label: {
+                    Image(systemName: "xmark.circle.fill")
+                        .font(.title)
+                        .foregroundColor(.primary)
+                }
+            }
+        }
+        .padding()
+    }
+    var infoMenuView:some View{
+        HStack{
+            Button {
+                
+            } label: {
+                Image(systemName:"square.and.arrow.up")
+                    .padding(10)
+                    .background{
+                        Color.reversal
+                        Color.gray.opacity(0.2)
+                    }
+                    .clipShape(Circle())
+                
+            }
+            Spacer()
+            HStack{
+                Button {
+                    
+                } label: {
+                    Image(systemName:"heart")
+                }
+                .padding(.trailing,30)
+                Button {
+                    
+                } label: {
+                    Image(systemName:"info.circle")
+                }
+                Button {
+                    
+                } label: {
+                    Image(systemName:"crop.rotate")
+                }
+                .padding(.leading,30)
+            }
+            .padding(10)
+            .background{
+                Color.reversal
+                Color.gray.opacity(0.2)
+            }
+            .clipShape(Capsule())
+            
+            Spacer()
+            Button {
+                
+            } label: {
+                Image(systemName:"trash")
+                    .padding(10)
+                    .background{
+                        Color.reversal
+                        Color.gray.opacity(0.2)
+                    }
+                    .clipShape(Circle())
+            }
+        }
     }
     private var gridAdjustmenGesture:some Gesture{
         MagnificationGesture()

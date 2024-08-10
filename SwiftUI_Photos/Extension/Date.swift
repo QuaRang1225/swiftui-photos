@@ -17,4 +17,16 @@ extension Date?{
         dateFormatter.locale = Locale(identifier: "ko_KR")
         return dateFormatter.string(from: self)
     }
+    func formattedTitleDate() -> (date:String,time:String) {
+        guard let self else {
+            return ("","")
+        }
+        let dateFormatter = DateFormatter()
+        let timeFormatter = DateFormatter()
+        dateFormatter.dateFormat = "yyyy년 M월 d일"
+        timeFormatter.dateFormat = "EEEE a h:mm"
+        timeFormatter.locale = Locale(identifier: "ko_KR")
+        dateFormatter.locale = Locale(identifier: "ko_KR")
+        return (dateFormatter.string(from: self),timeFormatter.string(from: self))
+    }
 }

@@ -16,6 +16,14 @@ struct City: Identifiable {
     let city: String
     let district: String
     let coordinate: CLLocation
+    
+    init(asset: PHAsset, country: String, city: String, district: String) {
+        self.asset = asset
+        self.country = country
+        self.city = city
+        self.district = district
+        self.coordinate = asset.location ?? CLLocation()
+    }
 }
 
 struct LocationMapView: View {
@@ -108,6 +116,6 @@ struct LocationMapView: View {
 }
 
 #Preview {
-    LocationMapView(buttonMode: true, annotions: [City(asset: PHAsset(), country: "asdasd", city: "asd", district: "asda", coordinate: CLLocation())], dismiss: .constant(false))
+    LocationMapView(buttonMode: true, annotions: [City(asset: PHAsset(), country: "asdasd", city: "asd", district: "asda")], dismiss: .constant(false))
         .environmentObject(PhotoViewModel())
 }

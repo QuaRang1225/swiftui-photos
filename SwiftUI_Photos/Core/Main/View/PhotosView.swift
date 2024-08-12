@@ -11,8 +11,7 @@ import Photos
 struct PhotosView: View {
     
     @State private var numberOfColumns: CGFloat = 3
-    @State private var selectedAssets: PHAsset?
-    @State private var selectedVideo: VideoPlayerItem?
+    @State private var selectedAssets: AssetItem?
     @State private var position = CGSize.zero
     @Namespace private var namespace
     @StateObject var vm = PhotoViewModel()
@@ -59,9 +58,8 @@ struct PhotosView: View {
         .fullScreenCover(isPresented: $isMap){
             if let adress,let ci = adress.city,let co = adress.country,let di = adress.district{
                 if let selectedAssets{
-                    LocationMapView(buttonMode: false, annotions:  [City(asset: selectedAssets, country:co, city: ci, district: di, coordinate: selectedAssets.location ?? CLLocation(latitude: 1, longitude: 1))], dismiss: $isMap)
-                }else if let asset = selectedVideo?.asset{
-                    LocationMapView(buttonMode: false, annotions:  [City(asset: asset, country:co, city: ci, district: di, coordinate: asset.location ?? CLLocation(latitude: 1, longitude: 1))], dismiss: $isMap)
+                    let city = City(asset: selectedAssets.asset, country: co, city: ci, district: di)
+                    LocationMapView(buttonMode: false, annotions: [city], dismiss: $isMap)
                 }
             }
         }
@@ -148,13 +146,13 @@ struct PhotosView: View {
                                 }
                                 .onTapGesture {
                                     vm.progress = true
+                                    self.selecteIndex = index
                                     switch asset.mediaType{
                                     case .image:
-                                        self.selecteIndex = index
                                         withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
-                                            self.selectedAssets = asset
+                                            self.selectedAssets = AssetItem(asset: asset)
                                         }
-                                    case .video: playVideo(asset:asset,id:asset.localIdentifier)
+                                    case .video: playVideo(asset:asset)
                                     default: return
                                     }
                                 }
@@ -401,89 +399,86 @@ struct PhotosView: View {
         ZStack{
             Color.reversal
                 .ignoresSafeArea()
-                .opacity((selectedAssets == nil && selectedVideo == nil ) ? 0 : min(1, max(0, 1 - Double(position.height / 800))))
+                .opacity(selectedAssets == nil ? 0 : min(1, max(0, 1 - Double(position.height / 800))))
             VStack{
                 if !info{
                     infoTextView
                 }
-                if let selectedAssets {
-                    GeometryReader{ geo in
-                        let g = geo.frame(in: .named("G"))
-                        PhotosItemView(assets: .constant(selectedAssets))
-                            .scaledToFit()
-                            .frame(maxWidth: .infinity,maxHeight: .infinity)
-                            .matchedGeometryEffect(id: selectedAssets.localIdentifier, in: namespace)
-                            .onChange(of: changed) { change in
-                                withAnimation(.easeIn(duration: 0.1)){
-                                    if g.minX > 0{
-                                        currentOffset.width = currentOffset.width - g.minX
-                                    }
-                                    if g.minY > 0{
-                                        currentOffset.height = currentOffset.height - g.minY
-                                    }
-                                    if g.maxX < width(){
-                                        currentOffset.width = g.minX - currentOffset.width
-                                    }
-                                    if g.maxY < width(){
-                                        currentOffset.height = g.minY - currentOffset.height
-                                    }
-                                    if !change{
-                                        endOffset = currentOffset
+                if let selectedAssets{
+                    if let video = selectedAssets.playerItem{
+                        VideoPlayerView(item: video, offset: $videoOffset)
+                            .gesture(drag)
+                            .onAppear{
+                                isFavorite = selectedAssets.asset.isFavorite
+                                vm.progress = false
+                            }
+                        if !info{
+                            infoMenuView
+                                .padding(30)
+                                .matchedGeometryEffect(id: "info", in: namespace)
+                        }
+                    }else{
+                        GeometryReader{ geo in
+                            let g = geo.frame(in: .named("G"))
+                            PhotosItemView(assets: .constant(selectedAssets.asset))
+                                .scaledToFit()
+                                .frame(maxWidth: .infinity,maxHeight: .infinity)
+                                .matchedGeometryEffect(id: selectedAssets.asset.localIdentifier, in: namespace)
+                                .onChange(of: changed) { change in
+                                    withAnimation(.easeIn(duration: 0.1)){
+                                        if g.minX > 0{
+                                            currentOffset.width = currentOffset.width - g.minX
+                                        }
+                                        if g.minY > 0{
+                                            currentOffset.height = currentOffset.height - g.minY
+                                        }
+                                        if g.maxX < width(){
+                                            currentOffset.width = g.minX - currentOffset.width
+                                        }
+                                        if g.maxY < width(){
+                                            currentOffset.height = g.minY - currentOffset.height
+                                        }
+                                        if !change{
+                                            endOffset = currentOffset
+                                        }
                                     }
                                 }
-                            }
-                    }
-                    .scaleEffect(mainCurrentScale)
-                    .offset(currentOffset)
-                    .simultaneousGesture(drag)
-                    .simultaneousGesture(pinch)
-                    .onTapGesture(count: 2) { // 더블 탭 감지
-                        withAnimation {
-                            if mainCurrentScale == 1{
-                                mainCurrentScale = 2
-                                endScale = 2
-                            }else{
-                                mainCurrentScale = 1
-                                endScale = 1
-                                currentOffset = .zero
-                                endOffset = .zero
+                        }
+                        .scaleEffect(mainCurrentScale)
+                        .offset(currentOffset)
+                        .simultaneousGesture(drag)
+                        .simultaneousGesture(pinch)
+                        .onTapGesture(count: 2) { // 더블 탭 감지
+                            withAnimation {
+                                if mainCurrentScale == 1{
+                                    mainCurrentScale = 2
+                                    endScale = 2
+                                }else{
+                                    mainCurrentScale = 1
+                                    endScale = 1
+                                    currentOffset = .zero
+                                    endOffset = .zero
+                                }
                             }
                         }
-                    }
-                    .coordinateSpace(name: "G")
-                    .onAppear{
-                        isFavorite = selectedAssets.isFavorite
-                        vm.progress = false
-                    }
-                    if !info{
-                        infoMenuView
-                            .padding(30)
-                            .matchedGeometryEffect(id: "info", in: namespace)
-                    }
-                }
-                if let selectedVideo{
-                    VideoPlayerView(item: $selectedVideo, offset: $videoOffset)
-                        .gesture(videoDrag)
+                        .coordinateSpace(name: "G")
                         .onAppear{
-                            isFavorite = selectedVideo.asset.isFavorite
+                            isFavorite = selectedAssets.asset.isFavorite
                             vm.progress = false
                         }
-                    if !info{
-                        infoMenuView
-                            .padding(30)
-                            .matchedGeometryEffect(id: "info", in: namespace)
+                        if !info{
+                            infoMenuView
+                                .padding(30)
+                                .matchedGeometryEffect(id: "info", in: namespace)
+                        }
                     }
                     
                 }
                 if info{
                     if let selectedAssets{
-                        infoView(asset:selectedAssets)
-                    }
-                    else if let selectedVideo{
-                        infoView(asset:selectedVideo.asset)
+                        infoView(asset:selectedAssets.asset)
                     }
                 }
-                
             }
         }
     }
@@ -540,7 +535,7 @@ struct PhotosView: View {
                     isMap = true
                 } label: {
                     VStack(spacing: 0){
-                        LocationMapView(buttonMode: true, annotions: [City(asset: asset, country:co, city: ci, district: di, coordinate: asset.location ?? CLLocation(latitude: 1, longitude: 1))], dismiss: .constant(false))
+                        LocationMapView(buttonMode: true, annotions: [City(asset: asset, country:co, city: ci, district: di)], dismiss: .constant(false))
                             .frame(height: 150)
                             .allowsHitTesting(false)
                         HStack{
@@ -590,7 +585,7 @@ struct PhotosView: View {
         HStack{
             if let selectedAssets{
                 VStack(alignment: .leading){
-                    let date = selectedAssets.creationDate.formattedTitleDate()
+                    let date = selectedAssets.asset.creationDate.formattedTitleDate()
                     Text(date.date)
                         .font(.title)
                     Text(date.time)
@@ -603,26 +598,6 @@ struct PhotosView: View {
                         self.selectedAssets = nil
                     }
                     
-                } label: {
-                    Image(systemName: "xmark.circle.fill")
-                        .font(.title)
-                        .foregroundColor(.primary)
-                }
-            }
-            if let asset = selectedVideo?.asset{
-                VStack(alignment: .leading){
-                    let date = asset.creationDate.formattedTitleDate()
-                    Text(date.date)
-                        .font(.title)
-                    Text(date.time)
-                        .font(.subheadline)
-                        .opacity(0.8)
-                }.bold()
-                Spacer()
-                Button {
-                    withAnimation {
-                        self.selectedVideo = nil
-                    }
                 } label: {
                     Image(systemName: "xmark.circle.fill")
                         .font(.title)
@@ -683,12 +658,8 @@ struct PhotosView: View {
         HStack{
             Button {
                 if let selectedAssets {
-                    fetchImage(from: selectedAssets) { img in
+                    fetchImage(from: selectedAssets.asset) { img in
                         shareMedia(image: img, videoURL: nil)
-                    }
-                } else if let asset = selectedVideo?.asset {
-                    fetchVideoURL(from: asset) { url in
-                        shareMedia(image: nil, videoURL: url)
                     }
                 }
             } label: {
@@ -706,9 +677,9 @@ struct PhotosView: View {
                 Button {
                     if let selectedAssets {
                         DispatchQueue.global().async {
-                            vm.assetavorite(asset: selectedAssets,isFavorite:isFavorite){ asset,favorite  in
+                            vm.assetavorite(asset: selectedAssets.asset,isFavorite:isFavorite){ asset,favorite  in
                                 isFavorite = favorite
-                                if let index = vm.assetList.firstIndex(where: {$0 == selectedAssets}),let asset{
+                                if let index = vm.assetList.firstIndex(where: {$0 == selectedAssets.asset}),let asset{
                                     DispatchQueue.main.async {
                                         withAnimation {
                                             if photosMode == .bookmark{
@@ -723,27 +694,6 @@ struct PhotosView: View {
                             }
                         }
                     }
-                    if let asset = selectedVideo?.asset {
-                        DispatchQueue.global().async {
-                            vm.assetavorite(asset: asset,isFavorite:isFavorite){ asset,favorite  in
-                                isFavorite = favorite
-                                if let index = vm.assetList.firstIndex(where: {$0 == asset}),let asset{
-                                    DispatchQueue.main.async {
-                                        withAnimation {
-                                            if photosMode == .bookmark{
-                                                vm.assetList = vm.assetList.filter{$0 != asset}
-                                            }else{
-                                                vm.assetList[index] = asset
-                                            }
-                                            vm.assets = vm.assetList
-                                        }
-                                       
-                                    }
-                                }
-                            }
-                        }
-                    }
-                    
                 } label: {
                     Image(systemName:isFavorite ? "heart.fill" : "heart")
                 }
@@ -772,25 +722,12 @@ struct PhotosView: View {
             Spacer()
             Button {
                 if let selectedAssets {
-                    vm.deleteAssetLibrary(asset: selectedAssets) { asset in
+                    vm.deleteAssetLibrary(asset: selectedAssets.asset) { asset in
                         DispatchQueue.main.async {
                             withAnimation {
                                 vm.assetList = vm.assetList.filter{$0 != asset}
                                 vm.assets = vm.assetList
                                 self.selectedAssets = nil
-                                self.show = false
-                                vm.fetchAlbums()
-                            }
-                        }
-                    }
-                }
-                if let asset = selectedVideo?.asset {
-                    vm.deleteAssetLibrary(asset: asset) { asset in
-                        DispatchQueue.main.async {
-                            withAnimation {
-                                vm.assetList = vm.assetList.filter{$0 != asset}
-                                vm.assets = vm.assetList
-                                self.selectedVideo = nil
                                 self.show = false
                                 vm.fetchAlbums()
                             }
@@ -848,7 +785,7 @@ struct PhotosView: View {
         .clipped()
         .cornerRadius(5)
     }
-    private func playVideo(asset: PHAsset,id:String){
+    private func playVideo(asset: PHAsset){
         let options = PHVideoRequestOptions()
         options.isNetworkAccessAllowed = true
         
@@ -856,32 +793,11 @@ struct PhotosView: View {
             DispatchQueue.main.async {
                 withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
                     if let playerItem {
-                        selectedVideo = VideoPlayerItem(id: id, asset: asset, playerItem: AVPlayer(playerItem: playerItem))
+                        self.selectedAssets = AssetItem(asset: asset, playerItem: AVPlayer(playerItem: playerItem))
                     }
                 }
             }
         }
-    }
-    var videoDrag:some Gesture{
-        DragGesture()
-            .onChanged { gesture in
-                if gesture.translation.height < 20{
-                    withAnimation {
-                        self.info = true
-                    }
-                }
-            }
-            .onEnded { gesture in
-                if gesture.translation.height > 20{
-                    withAnimation {
-                        if info{
-                            self.info = false
-                        }else{
-                            self.selectedVideo = nil
-                        }
-                    }
-                }
-            }
     }
     var drag:some Gesture{
         DragGesture()
@@ -897,16 +813,25 @@ struct PhotosView: View {
             }
             .onEnded { gesture in
                 if mainCurrentScale == 1{
-                    
                     if gesture.translation.width < -20{
-                            guard selecteIndex < vm.assetList.count-1 else {return}
-                            self.selecteIndex += 1
-                            selectedAssets = vm.assetList[selecteIndex]
+                        guard selecteIndex < vm.assetList.count-1 else {return}
+                        self.selecteIndex += 1
+                        if vm.assetList[selecteIndex].mediaType == .video{
+                            vm.progress = true
+                            playVideo(asset: vm.assetList[selecteIndex])
+                        }else{
+                            selectedAssets = AssetItem(asset: vm.assetList[selecteIndex])
+                        }
                     }
                     if gesture.translation.width > 20{
-                            guard selecteIndex > 0 else {return}
-                            self.selecteIndex -= 1
-                            selectedAssets = vm.assetList[selecteIndex]
+                        guard selecteIndex > 0 else {return}
+                        self.selecteIndex -= 1
+                        if vm.assetList[selecteIndex].mediaType == .video{
+                            vm.progress = true
+                            playVideo(asset: vm.assetList[selecteIndex])
+                        }else{
+                            selectedAssets = AssetItem(asset: vm.assetList[selecteIndex])
+                        }
                     }
                     if gesture.translation.height < -20{
                         withAnimation {

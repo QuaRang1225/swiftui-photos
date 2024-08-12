@@ -9,8 +9,8 @@ import Foundation
 import Photos
 
 struct AlbumListItem{
-    var id:String
-    var asset:PHAsset?
-    var title:String
+    let id:String
+    let asset:PHAsset?
+    let title:String
     var collection:PHAssetCollection
 }

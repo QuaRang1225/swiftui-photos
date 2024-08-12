@@ -120,40 +120,42 @@ struct PhotosView: View {
                         }
                 }
                 .frame(height: 1)
-                LazyVGrid(columns:assetsItems,spacing: 0){
-                    ForEach(vm.assetList, id: \.self) { asset in
-                        PhotosItemView(assets: asset)
-                            .background(Color.white)
-                            .aspectRatio(contentMode: isFill ? .fill : .fit)
-                            .frame(width: size.width, height: size.height)
-                            .clipShape(Rectangle()) // 원하는 모양으로 클리핑
-                            .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
-                            .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
-                            .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
-                            .overlay(alignment:.bottomTrailing){
-                                HStack{
-                                    if asset.isFavorite{
-                                        Image(systemName: "heart.fill")
+                if selectedAssets == nil{
+                    LazyVGrid(columns:assetsItems,spacing: 0){
+                        ForEach(vm.assetList, id: \.self) { asset in
+                            PhotosItemView(assets: asset)
+                                .background(Color.white)
+                                .aspectRatio(contentMode: isFill ? .fill : .fit)
+                                .frame(width: size.width, height: size.height)
+                                .clipShape(Rectangle()) // 원하는 모양으로 클리핑
+                                .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
+                                .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
+                                .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
+                                .overlay(alignment:.bottomTrailing){
+                                    HStack{
+                                        if asset.isFavorite{
+                                            Image(systemName: "heart.fill")
+                                        }
+                                        if asset.mediaType == .video{
+                                            Text(asset.duration.timeFormatter())
+                                        }
                                     }
-                                    if asset.mediaType == .video{
-                                        Text(asset.duration.timeFormatter())
+                                    .foregroundColor(.white)
+                                    .shadow(color:.black.opacity(0.5),radius: 1)
+                                    .padding(4)
+                                }
+                                .onTapGesture {
+                                    vm.progress = true
+                                    switch asset.mediaType{
+                                    case .image:
+                                        withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
+                                            selectedAssets = asset
+                                        }
+                                    case .video: playVideo(asset:asset,id:asset.localIdentifier)
+                                    default: return
                                     }
                                 }
-                                .foregroundColor(.white)
-                                .shadow(color:.black.opacity(0.5),radius: 1)
-                                .padding(4)
-                            }
-                            .onTapGesture {
-                                vm.progress = true
-                                switch asset.mediaType{
-                                case .image:
-                                    withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
-                                        selectedAssets = asset
-                                    }
-                                case .video: playVideo(asset:asset,id:asset.localIdentifier)
-                                default: return
-                                }
-                            }
+                        }
                     }
                 }
             }

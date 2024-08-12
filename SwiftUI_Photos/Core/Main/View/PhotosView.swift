@@ -104,61 +104,67 @@ struct PhotosView: View {
                 assetControllView
                 GeometryReader{ proxy in
                     let minY = proxy.frame(in: .global).minY
-                    Color.clear
-                        .onChange(of: minY) { value in
-                            if abs(value - lastminY) > 15 {    //임계값 10으로 설정
-                                lastminY = value
-                                withAnimation {
-                                    if show,lastminY < mainOffsetY {
-                                        show = false
-                                    } else if !show,lastminY > mainOffsetY {
-                                        show = true
-                                    }
-                                }
-                            }
-                        }
-                }
-                .frame(height: 1)
-                if selectedAssets == nil{
                     LazyVGrid(columns:assetsItems,spacing: 0){
                         ForEach(vm.assetList.indices, id: \.self) { index in
                             let asset = vm.assetList[index]
-                            PhotosItemView(assets: .constant(asset))
-                                .background(Color.white)
-                                .aspectRatio(contentMode: isFill ? .fill : .fit)
-                                .frame(width: size.width, height: size.height)
-                                .clipShape(Rectangle()) // 원하는 모양으로 클리핑
-                                .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
-                                .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
-                                .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
-                                .overlay(alignment:.bottomTrailing){
-                                    HStack{
-                                        if asset.isFavorite{
-                                            Image(systemName: "heart.fill")
+                            Group{
+                                if selectedAssets == nil{
+                                    Button {
+                                        vm.progress = true
+                                        self.selecteIndex = index
+                                        switch asset.mediaType{
+                                        case .image:
+                                            withAnimation(.spring(response: 0.25)) {
+                                                self.selectedAssets = AssetItem(asset: asset)
+                                            }
+                                        case .video: playVideo(asset:asset)
+                                        default: return
                                         }
-                                        if asset.mediaType == .video{
-                                            Text(asset.duration.timeFormatter())
-                                        }
+                                    } label: {
+                                        PhotosItemView(assets: .constant(asset))
+                                            .aspectRatio(contentMode: isFill ? .fill : .fit)
+                                            .frame(width: size.width, height: size.height)
+                                            .clipShape(Rectangle()) // 원하는 모양으로 클리핑
+                                            .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
+                                            .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
+                                            .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
                                     }
-                                    .foregroundColor(.white)
-                                    .shadow(color:.black.opacity(0.5),radius: 1)
-                                    .padding(4)
-                                }
-                                .onTapGesture {
-                                    vm.progress = true
-                                    self.selecteIndex = index
-                                    switch asset.mediaType{
-                                    case .image:
-                                        withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
-                                            self.selectedAssets = AssetItem(asset: asset)
+                                    .overlay(alignment:.bottomTrailing){
+                                        HStack{
+                                            if asset.isFavorite{
+                                                Image(systemName: "heart.fill")
+                                            }
+                                            if asset.mediaType == .video{
+                                                Text(asset.duration.timeFormatter())
+                                            }
                                         }
-                                    case .video: playVideo(asset:asset)
-                                    default: return
+                                        .foregroundColor(.white)
+                                        .shadow(color:.black.opacity(0.5),radius: 1)
+                                        .padding(4)
                                     }
                                 }
+                                else{
+                                    Color.clear
+                                        .frame(width: size.width, height: size.height)
+                                }
+                            }
+                        }
+                    }
+                    .onChange(of: minY) { value in
+                        if abs(value - lastminY) > 15 {    //임계값 10으로 설정
+                            lastminY = value
+                            withAnimation {
+                                if show,lastminY < mainOffsetY {
+                                    show = false
+                                } else if !show,lastminY > mainOffsetY {
+                                    show = true
+                                }
+                            }
                         }
                     }
                 }
+                .frame(height: size.height * CGFloat(ceil(Double(vm.assetList.count/3))))
+                
             }
         }
         .overlay(alignment: .topLeading){
@@ -791,7 +797,7 @@ struct PhotosView: View {
         
         PHImageManager.default().requestPlayerItem(forVideo: asset, options: options) { playerItem, _ in
             DispatchQueue.main.async {
-                withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
+                withAnimation(.spring(response: 0.25)) {
                     if let playerItem {
                         self.selectedAssets = AssetItem(asset: asset, playerItem: AVPlayer(playerItem: playerItem))
                     }
@@ -882,5 +888,6 @@ struct SizePreferenceKey: PreferenceKey {
     static var defaultValue: CGSize = .zero
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) { }
 }
+
 
 

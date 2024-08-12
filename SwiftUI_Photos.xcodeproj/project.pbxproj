@@ -34,6 +34,7 @@
 		D6ABD3362C66FA6A00ADA099 /* Int.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ABD3352C66FA6A00ADA099 /* Int.swift */; };
 		D6ABD3382C670C8000ADA099 /* CLLocation.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ABD3372C670C8000ADA099 /* CLLocation.swift */; };
 		D6BBCCF12C67D67C002BDCA8 /* AlbumListItem.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BBCCF02C67D67C002BDCA8 /* AlbumListItem.swift */; };
+		D6BBCCF62C6A173D002BDCA8 /* CropImageView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6BBCCF52C6A173C002BDCA8 /* CropImageView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -85,6 +86,7 @@
 		D6ABD3352C66FA6A00ADA099 /* Int.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Int.swift; sourceTree = "<group>"; };
 		D6ABD3372C670C8000ADA099 /* CLLocation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CLLocation.swift; sourceTree = "<group>"; };
 		D6BBCCF02C67D67C002BDCA8 /* AlbumListItem.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumListItem.swift; sourceTree = "<group>"; };
+		D6BBCCF52C6A173C002BDCA8 /* CropImageView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CropImageView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -176,6 +178,7 @@
 		D60A53842C61F8C7001F73F2 /* Core */ = {
 			isa = PBXGroup;
 			children = (
+				D6BBCCF42C6A172C002BDCA8 /* Photos */,
 				D60A53B02C64A8A8001F73F2 /* Video */,
 				D60A53AF2C64A893001F73F2 /* Main */,
 			);
@@ -275,6 +278,14 @@
 				D60A53B22C64A8E0001F73F2 /* AVPlayerView.swift */,
 			);
 			path = View;
+			sourceTree = "<group>";
+		};
+		D6BBCCF42C6A172C002BDCA8 /* Photos */ = {
+			isa = PBXGroup;
+			children = (
+				D6BBCCF52C6A173C002BDCA8 /* CropImageView.swift */,
+			);
+			path = Photos;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -407,6 +418,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				D6BBCCF62C6A173D002BDCA8 /* CropImageView.swift in Sources */,
 				D6ABD32E2C66B19700ADA099 /* CGSize.swift in Sources */,
 				D60A53B32C64A8E1001F73F2 /* AVPlayerView.swift in Sources */,
 				D60A53962C63094F001F73F2 /* PhotosItemView.swift in Sources */,

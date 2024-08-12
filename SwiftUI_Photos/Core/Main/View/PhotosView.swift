@@ -45,13 +45,15 @@ struct PhotosView: View {
     @State var isFavorite = false
     @State var selecteIndex:Int = 0
     
+//    @State var cropSize:CGSize = .zero
+//    @State var crop = false
+    
     var body: some View {
         ZStack{
             imageListView
             imageItemView
             menuView
         }
-        .environmentObject(vm)
         .progress(vm.progress)
         .userAllowAccessAlbum(vm.accessDenied)
         .gesture(gridAdjustmenGesture)
@@ -96,6 +98,13 @@ struct PhotosView: View {
                 vm.assetList = vm.assets.filter{ $0.mediaSubtypes == .videoHighFrameRate }
             }
         }
+//        .fullScreenCover(isPresented: $crop){
+//            if let asset = selectedAssets?.asset,cropSize != .zero{
+//                CropImageView(frame: $cropSize,asset: asset,dismiss: $crop)
+//                    
+//            }
+//        }
+        .environmentObject(vm)
     }
     var imageListView:some View{
         ScrollView {
@@ -152,11 +161,13 @@ struct PhotosView: View {
                     }
                     .onChange(of: minY) { value in
                         if abs(value - lastminY) > 15 {    //임계값 10으로 설정
-                            lastminY = value
-                            if show,lastminY < mainOffsetY {
-                                show = false
-                            } else if !show,lastminY > mainOffsetY {
-                                show = true
+                            withAnimation(.linear(duration:0.2)){
+                                lastminY = value
+                                if show,lastminY < mainOffsetY {
+                                    show = false
+                                } else if !show,lastminY > mainOffsetY {
+                                    show = true
+                                }
                             }
                         }
                     }
@@ -422,6 +433,15 @@ struct PhotosView: View {
                             let g = geo.frame(in: .named("G"))
                             PhotosItemView(assets: .constant(selectedAssets.asset))
                                 .scaledToFit()
+//                                .overlay{
+//                                    GeometryReader{ proxy in
+//                                        Color.clear
+//                                            .preference(key: SizePreferenceKey.self, value: proxy.size)
+//                                            .onChange(of: proxy.size){ value in
+//                                                self.cropSize = proxy.size
+//                                            }
+//                                    }
+//                                }
                                 .frame(maxWidth: .infinity,maxHeight: .infinity)
                                 .matchedGeometryEffect(id: selectedAssets.asset.localIdentifier, in: namespace)
                                 .onChange(of: changed) { change in
@@ -608,6 +628,7 @@ struct PhotosView: View {
                 Button {
                     withAnimation(.easeIn(duration: 0.1)) {
                         self.selectedAssets = nil
+//                        cropSize = .zero
                     }
                     
                 } label: {
@@ -717,11 +738,11 @@ struct PhotosView: View {
                 } label: {
                     Image(systemName:!info ? "info.circle" : "info.circle.fill")
                 }
-                Button {
-                    
-                } label: {
-                    Image(systemName:"crop.rotate")
-                }
+//                Button {
+//                    crop = true
+//                } label: {
+//                    Image(systemName:"crop.rotate")
+//                }
                 .padding(.leading,30)
             }
             .padding(10)
@@ -740,6 +761,7 @@ struct PhotosView: View {
                                 vm.assetList = vm.assetList.filter{$0 != asset}
                                 vm.assets = vm.assetList
                                 self.selectedAssets = nil
+//                                cropSize = .zero
                                 self.show = false
                                 vm.fetchAlbums()
                             }
@@ -866,6 +888,7 @@ struct PhotosView: View {
                                 self.info = false
                             }else{
                                 self.selectedAssets = nil
+//                                cropSize = .zero
                             }
                         }
                     }

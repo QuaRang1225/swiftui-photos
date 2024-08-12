@@ -109,51 +109,51 @@ struct PhotosView: View {
                             let asset = vm.assetList[index]
                             Group{
                                 if selectedAssets == nil{
-                                    Button {
-                                        vm.progress = true
-                                        self.selecteIndex = index
-                                        switch asset.mediaType{
-                                        case .image:
-                                            withAnimation(.spring(response: 0.25)) {
-                                                self.selectedAssets = AssetItem(asset: asset)
+                                    PhotosItemView(assets: .constant(asset))
+                                        .aspectRatio(contentMode: isFill ? .fill : .fit)
+                                        .frame(width: size.width, height: size.height)
+                                        .clipShape(Rectangle()) // 원하는 모양으로 클리핑
+                                        .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
+                                        .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
+                                        .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
+                                        .overlay(alignment:.bottomTrailing){
+                                            HStack{
+                                                if asset.isFavorite{
+                                                    Image(systemName: "heart.fill")
+                                                }
+                                                if asset.mediaType == .video{
+                                                    Text(asset.duration.timeFormatter())
+                                                }
                                             }
-                                        case .video: playVideo(asset:asset)
-                                        default: return
+                                            .foregroundColor(.white)
+                                            .shadow(color:.black.opacity(0.5),radius: 1)
+                                            .padding(4)
                                         }
-                                    } label: {
-                                        PhotosItemView(assets: .constant(asset))
-                                            .aspectRatio(contentMode: isFill ? .fill : .fit)
-                                            .frame(width: size.width, height: size.height)
-                                            .clipShape(Rectangle()) // 원하는 모양으로 클리핑
-                                            .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
-                                            .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
-                                            .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
-                                    }
-                                    .overlay(alignment:.bottomTrailing){
-                                        HStack{
-                                            if asset.isFavorite{
-                                                Image(systemName: "heart.fill")
-                                            }
-                                            if asset.mediaType == .video{
-                                                Text(asset.duration.timeFormatter())
+                                        .onTapGesture {
+                                            vm.progress = true
+                                            self.selecteIndex = index
+                                            switch asset.mediaType{
+                                            case .image:
+                                                withAnimation(.spring(response: 0.25)) {
+                                                    self.selectedAssets = AssetItem(asset: asset)
+                                                }
+                                            case .video: playVideo(asset:asset)
+                                            default: return
                                             }
                                         }
-                                        .foregroundColor(.white)
-                                        .shadow(color:.black.opacity(0.5),radius: 1)
-                                        .padding(4)
-                                    }
                                 }
                                 else{
                                     Color.clear
                                         .frame(width: size.width, height: size.height)
                                 }
                             }
+                            .transition(.move(edge: .bottom))
                         }
                     }
                     .onChange(of: minY) { value in
                         if abs(value - lastminY) > 15 {    //임계값 10으로 설정
                             lastminY = value
-                            withAnimation {
+                            withAnimation{
                                 if show,lastminY < mainOffsetY {
                                     show = false
                                 } else if !show,lastminY > mainOffsetY {
@@ -174,7 +174,6 @@ struct PhotosView: View {
                     Spacer()
                     if !show{
                         ratioView
-                            .matchedGeometryEffect(id: "ratio", in: namespace)
                             .padding()
                     }
                     if show{
@@ -210,7 +209,6 @@ struct PhotosView: View {
             Spacer()
         }
         .padding()
-        
         .allowsHitTesting(false)
         
     }
@@ -312,7 +310,7 @@ struct PhotosView: View {
     }
     var optionCategoryView:some View{
         HStack{
-            ratioView.matchedGeometryEffect(id: "ratio", in: namespace)
+            ratioView
             Button {
                 withAnimation {
                     vm.isAsscending.toggle()
@@ -344,60 +342,59 @@ struct PhotosView: View {
                 .lineLimit(1)
                 .frame(width: 100)
         }
-        return VStack{
-            ScrollView(.horizontal,showsIndicators: false){
+        return GeometryReader{ proxy in
+            VStack{
                 if show{
-                    HStack{
-                        Button {
-                            photosMode = .all
-                            vm.album = nil
-                            vm.fetchAlbumAssets(from: nil, condition: nil)
-                            if let asset = vm.fetchPhotosFirstAssets(mode:.all){
-                                vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
-                            }
-                        } label: {
-                            VStack{
-                                albumCategoryRow(assets: vm.fetchPhotosFirstAssets(mode:.all))
-                                labelType(text:PhotosFilter.all.rawValue)
-                            }
-                        }
-                        ForEach(vm.albums,id: \.id) { album in
+                    ScrollView(.horizontal,showsIndicators: false){
+                        HStack{
                             Button {
-                                photosMode = .other
-                                vm.album = album
-                                vm.fetchAlbumAssets(from: album.collection, condition: nil)
-                                if let asset = vm.fetchAlbumsFirstAssets(collection: album.collection){
+                                photosMode = .all
+                                vm.album = nil
+                                vm.fetchAlbumAssets(from: nil, condition: nil)
+                                if let asset = vm.fetchPhotosFirstAssets(mode:.all){
                                     vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
-                                }else{
-                                    self.image = nil
                                 }
                             } label: {
                                 VStack{
-                                    albumCategoryRow(assets: album.asset)
-                                    labelType(text: album.title)
+                                    albumCategoryRow(assets: vm.fetchPhotosFirstAssets(mode:.all))
+                                    labelType(text:PhotosFilter.all.rawValue)
                                 }
                             }
-                        }
-                    }.padding(.horizontal)
+                            ForEach(vm.albums,id: \.id) { album in
+                                Button {
+                                    photosMode = .other
+                                    vm.album = album
+                                    vm.fetchAlbumAssets(from: album.collection, condition: nil)
+                                    if let asset = vm.fetchAlbumsFirstAssets(collection: album.collection){
+                                        vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.image = $0 }
+                                    }else{
+                                        self.image = nil
+                                    }
+                                } label: {
+                                    VStack{
+                                        albumCategoryRow(assets: album.asset)
+                                        labelType(text: album.title)
+                                    }
+                                }
+                            }
+                        }.padding(.horizontal)
+                    }
                 }
             }
-            GeometryReader{ proxy in
-                Color.clear
-                    .onAppear{
-                        mainOffsetY = proxy.frame(in: .global).minY
-                    }
-                    .onChange(of: show) { value in
-                        withAnimation {
-                            if value{
-                                mainOffsetY = proxy.frame(in: .global).minY
-                            }else{
-                                mainOffsetY = lastminY
-                            }
-                        }
-                    }
+            .onAppear{
+                mainOffsetY = proxy.frame(in: .global).maxY
             }
-            .frame(height: 1)
+            .onChange(of: show) { value in
+                withAnimation {
+                    if value{
+                        mainOffsetY = proxy.frame(in: .global).maxY
+                    }else{
+                        mainOffsetY = lastminY
+                    }
+                }
+            }
         }
+        .frame(height: width()/3.5 + 20)
     }
     
     
@@ -888,6 +885,5 @@ struct SizePreferenceKey: PreferenceKey {
     static var defaultValue: CGSize = .zero
     static func reduce(value: inout CGSize, nextValue: () -> CGSize) { }
 }
-
 
 

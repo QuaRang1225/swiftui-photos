@@ -21,7 +21,6 @@ struct PhotosItemView: View {
                 Color.gray.opacity(0.1)
             }
         }
-        .transition(.move(edge: .trailing))
         .onAppear{
             vm.fetchImageFromAsset(asset: assets,targetSize: CGSize(width: width(), height: height())) { image = $0 }
         }

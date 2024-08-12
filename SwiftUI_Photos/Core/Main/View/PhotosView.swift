@@ -153,18 +153,15 @@ struct PhotosView: View {
                     .onChange(of: minY) { value in
                         if abs(value - lastminY) > 15 {    //임계값 10으로 설정
                             lastminY = value
-                            withAnimation{
-                                if show,lastminY < mainOffsetY {
-                                    show = false
-                                } else if !show,lastminY > mainOffsetY {
-                                    show = true
-                                }
+                            if show,lastminY < mainOffsetY {
+                                show = false
+                            } else if !show,lastminY > mainOffsetY {
+                                show = true
                             }
                         }
                     }
                 }
-                .frame(height: size.height * CGFloat(ceil(Double(vm.assetList.count/3))))
-                
+                .frame(height: size.height * CGFloat(ceil(Double(vm.assetList.count)/3)))
             }
         }
         .overlay(alignment: .topLeading){
@@ -197,6 +194,7 @@ struct PhotosView: View {
             }
         }
     }
+    //제목 ---------
     var headerView:some View{
         HStack(alignment: .top){
             VStack(alignment: .leading){
@@ -210,7 +208,6 @@ struct PhotosView: View {
         }
         .padding()
         .allowsHitTesting(false)
-        
     }
     var menuView:some View{
         ZStack{
@@ -410,7 +407,7 @@ struct PhotosView: View {
                 if let selectedAssets{
                     if let video = selectedAssets.playerItem{
                         VideoPlayerView(item: video, offset: $videoOffset)
-                            .gesture(drag)
+                            
                             .onAppear{
                                 isFavorite = selectedAssets.asset.isFavorite
                                 vm.progress = false
@@ -449,7 +446,6 @@ struct PhotosView: View {
                         }
                         .scaleEffect(mainCurrentScale)
                         .offset(currentOffset)
-                        .simultaneousGesture(drag)
                         .simultaneousGesture(pinch)
                         .onTapGesture(count: 2) { // 더블 탭 감지
                             withAnimation {
@@ -475,6 +471,16 @@ struct PhotosView: View {
                                 .matchedGeometryEffect(id: "info", in: namespace)
                         }
                     }
+                    HStack{
+                        ForEach(generateArray,id: \.self){ index in
+                            PhotosItemView(assets: .constant(vm.assetList[index]))
+                                .scaledToFill()
+                                .animation(.spring,value: selectedAssets.asset == vm.assetList[index])
+                                .frame(width: selectedAssets.asset == vm.assetList[index] ? 40:20,height: selectedAssets.asset == vm.assetList[index] ? 60:40)
+                                .clipped()
+                                .cornerRadius(3)
+                        }
+                    }
                     
                 }
                 if info{
@@ -482,8 +488,10 @@ struct PhotosView: View {
                         infoView(asset:selectedAssets.asset)
                     }
                 }
+                
             }
         }
+        .simultaneousGesture(drag)
     }
     
     func infoView(asset:PHAsset) -> some View{
@@ -533,12 +541,12 @@ struct PhotosView: View {
                 Spacer()
                 Text("\(asset.modificationDate.formattedDate())")
             }
-            if let adress,let ci = adress.city,let co = adress.country,let di = adress.district{
+            if let adress{
                 Button {
                     isMap = true
                 } label: {
                     VStack(spacing: 0){
-                        LocationMapView(buttonMode: true, annotions: [City(asset: asset, country:co, city: ci, district: di)], dismiss: .constant(false))
+                        LocationMapView(buttonMode: true, annotions: [City(asset: asset, country:adress.country ?? "미확인 구역", city: adress.city ?? "", district: adress.district ?? "")], dismiss: .constant(false))
                             .frame(height: 150)
                             .allowsHitTesting(false)
                         HStack{
@@ -569,11 +577,12 @@ struct PhotosView: View {
                 Color.gray.opacity(0.1).ignoresSafeArea()
             }.shadow(radius: 10)
         }
-        .onAppear{
+        .task{
+            self.adress = await asset.location?.fetchAddress()
+        }
+        .onChange(of: selectedAssets?.asset ?? PHAsset()){ asset in
             Task{
-                if let adress = await asset.location?.fetchAddress(){
-                    self.adress = adress
-                }
+                self.adress = await asset.location?.fetchAddress()
             }
         }
         .gesture(DragGesture().onEnded({ gesture in
@@ -597,7 +606,7 @@ struct PhotosView: View {
                 }.bold()
                 Spacer()
                 Button {
-                    withAnimation {
+                    withAnimation(.easeIn(duration: 0.1)) {
                         self.selectedAssets = nil
                     }
                     
@@ -727,7 +736,7 @@ struct PhotosView: View {
                 if let selectedAssets {
                     vm.deleteAssetLibrary(asset: selectedAssets.asset) { asset in
                         DispatchQueue.main.async {
-                            withAnimation {
+                            withAnimation(.easeIn(duration: 0.1)) {
                                 vm.assetList = vm.assetList.filter{$0 != asset}
                                 vm.assets = vm.assetList
                                 self.selectedAssets = nil
@@ -816,9 +825,14 @@ struct PhotosView: View {
             }
             .onEnded { gesture in
                 if mainCurrentScale == 1{
-                    if gesture.translation.width < -20{
+                    if gesture.translation.width < -50{
                         guard selecteIndex < vm.assetList.count-1 else {return}
                         self.selecteIndex += 1
+                        Task{
+                            if let adress = await vm.assetList[selecteIndex].location?.fetchAddress(){
+                                self.adress = adress
+                            }
+                        }
                         if vm.assetList[selecteIndex].mediaType == .video{
                             vm.progress = true
                             playVideo(asset: vm.assetList[selecteIndex])
@@ -826,9 +840,14 @@ struct PhotosView: View {
                             selectedAssets = AssetItem(asset: vm.assetList[selecteIndex])
                         }
                     }
-                    if gesture.translation.width > 20{
+                    if gesture.translation.width > 50{
                         guard selecteIndex > 0 else {return}
                         self.selecteIndex -= 1
+                        Task{
+                            if let adress = await vm.assetList[selecteIndex].location?.fetchAddress(){
+                                self.adress = adress
+                            }
+                        }
                         if vm.assetList[selecteIndex].mediaType == .video{
                             vm.progress = true
                             playVideo(asset: vm.assetList[selecteIndex])
@@ -836,13 +855,13 @@ struct PhotosView: View {
                             selectedAssets = AssetItem(asset: vm.assetList[selecteIndex])
                         }
                     }
-                    if gesture.translation.height < -20{
+                    if gesture.translation.height < -50{
                         withAnimation {
                             self.info = true
                         }
                     }
-                    if gesture.translation.height > 20{
-                        withAnimation {
+                    if gesture.translation.height > 50{
+                        withAnimation(.easeIn(duration: 0.1)) {
                             if info{
                                 self.info = false
                             }else{
@@ -873,6 +892,32 @@ struct PhotosView: View {
                 }
             }
         
+    }
+    
+    var generateArray:[Int]{
+        switch vm.assetList.count {
+        case 1...9:
+            return Array(0...(vm.assetList.count - 1))
+        default:
+            break
+        }
+        var indexRange = Array(selecteIndex-4...selecteIndex+4)
+        indexRange = indexRange.map { element in
+            if element < 0 {
+                return abs(element - (indexRange.last ?? 0))
+            } else {
+                return element
+            }
+        }
+        indexRange = indexRange.map { element in
+            if element > vm.assetList.count-1 {
+                return  (indexRange.first ?? 0) - (element - vm.assetList.count)
+            } else {
+                return element
+            }
+        }
+        print(Array(Set(indexRange).sorted()))
+        return Array(Set(indexRange).sorted())
     }
 }
 

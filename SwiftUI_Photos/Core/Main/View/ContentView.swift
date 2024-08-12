@@ -14,22 +14,7 @@ struct ContentView: View {
     var body: some View {
         NavigationView{
             PhotosView()
-                
         }
-//        .offset(offset)
-//        .onChange(of: offsetX){ value in
-//            print(value)
-//            if value > 70{
-//                withAnimation {
-//                    offset.height = 200
-//                }
-//            }
-//            else if value < 300{
-//                withAnimation {
-//                    offset.height = .zero
-//                }
-//            }
-//        }
         .environmentObject(vm)
     }
 }

@@ -10,7 +10,6 @@ import AVKit
 import Photos
 
 struct VideoPlayerView: View {
-//    @Binding var info:Bool
     var item: AVPlayer?
     @Binding var offset: CGSize
     @State private var currentTime: Double = 0
@@ -24,7 +23,6 @@ struct VideoPlayerView: View {
     var body: some View {
         VStack{
             AVPlayerView(player: item)
-//                .itemCloseGesture(position: $offset){ self.item = nil } 
                 .overlay(alignment: .bottomTrailing,content: {speakerView})
             timeProgressionView
             optionsView

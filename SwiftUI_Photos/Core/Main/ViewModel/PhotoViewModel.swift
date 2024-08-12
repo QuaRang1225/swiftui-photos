@@ -153,32 +153,7 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             }
         }
     }
-    //    func savePhotoLibrary(asset: PHAsset) {
-    //        let imageManager = PHImageManager.default()
-    //        let imageOptions = PHImageRequestOptions()
-    //        imageOptions.isSynchronous = true
-    //
-    //        if asset.mediaType == .image {
-    //            // 이미지 처리
-    //            imageManager.requestImage(for: asset,
-    //                                      targetSize: PHImageManagerMaximumSize,
-    //                                      contentMode: .aspectFill,
-    //                                      options: imageOptions) { image, _ in
-    //                if let image = image {
-    //                    PHPhotoLibrary.shared().performChanges({
-    //                        PHAssetCreationRequest.creationRequestForAsset(from: image)
-    //                    }) { success, error in
-    //                        if success {
-    //                            print("Image successfully saved to the photo library.")
-    //                        } else if let error = error {
-    //                            print("Error saving image to the photo library: \(error.localizedDescription)")
-    //                        }
-    //                    }
-    //                } else {
-    //                    print("Failed to fetch image from PHAsset.")
-    //                }
-    //            }
-    //        }
+   
     func assetavorite(asset: PHAsset, isFavorite:Bool,completion:@escaping (PHAsset?,Bool) ->()){
         PHPhotoLibrary.shared().performChanges({
             let request = PHAssetChangeRequest(for: asset)
@@ -193,25 +168,7 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             }
         }
     }
-    //    func saveVideoLibrary(asset: PHAsset) {
-    //        let videoOptions = PHVideoRequestOptions()
-    //        imageManager.requestAVAsset(forVideo: asset, options: videoOptions) { avAsset, _, _ in
-    //            if let avAsset = avAsset as? AVURLAsset {
-    //                let videoURL = avAsset.url
-    //                PHPhotoLibrary.shared().performChanges({
-    //                    PHAssetCreationRequest.creationRequestForAssetFromVideo(atFileURL: videoURL)
-    //                }) { success, error in
-    //                    if success {
-    //                        print("Video successfully saved to the photo library.")
-    //                    } else if let error = error {
-    //                        print("Error saving video to the photo library: \(error.localizedDescription)")
-    //                    }
-    //                }
-    //            } else {
-    //                print("Failed to fetch video from PHAsset.")
-    //            }
-    //        }
-    //    }
+
     func deleteAssetLibrary(asset: PHAsset,completion:@escaping (PHAsset)->()) {
         PHPhotoLibrary.shared().performChanges({
             PHAssetChangeRequest.deleteAssets([asset] as NSFastEnumeration)

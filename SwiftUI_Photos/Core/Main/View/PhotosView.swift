@@ -45,9 +45,6 @@ struct PhotosView: View {
     @State var isFavorite = false
     @State var selecteIndex:Int = 0
     
-//    @State var cropSize:CGSize = .zero
-//    @State var crop = false
-    
     var body: some View {
         ZStack{
             imageListView
@@ -98,12 +95,6 @@ struct PhotosView: View {
                 vm.assetList = vm.assets.filter{ $0.mediaSubtypes == .videoHighFrameRate }
             }
         }
-//        .fullScreenCover(isPresented: $crop){
-//            if let asset = selectedAssets?.asset,cropSize != .zero{
-//                CropImageView(frame: $cropSize,asset: asset,dismiss: $crop)
-//                    
-//            }
-//        }
         .environmentObject(vm)
     }
     var imageListView:some View{
@@ -121,9 +112,9 @@ struct PhotosView: View {
                                     PhotosItemView(assets: .constant(asset))
                                         .aspectRatio(contentMode: isFill ? .fill : .fit)
                                         .frame(width: size.width, height: size.height)
-                                        .clipShape(Rectangle()) // 원하는 모양으로 클리핑
-                                        .contentShape(Rectangle()) // 터치 영역을 클리핑된 영역으로 설정
-                                        .allowsHitTesting(true) // 터치 이벤트를 허용하는 설정
+                                        .clipShape(Rectangle())
+                                        .contentShape(Rectangle())
+                                        .allowsHitTesting(true)
                                         .matchedGeometryEffect(id: asset.localIdentifier, in: namespace)
                                         .overlay(alignment:.bottomTrailing){
                                             HStack{
@@ -160,7 +151,7 @@ struct PhotosView: View {
                         }
                     }
                     .onChange(of: minY) { value in
-                        if abs(value - lastminY) > 15 {    //임계값 10으로 설정
+                        if abs(value - lastminY) > 15 {
                             withAnimation(.linear(duration:0.2)){
                                 lastminY = value
                                 if show,lastminY < mainOffsetY {
@@ -433,15 +424,6 @@ struct PhotosView: View {
                             let g = geo.frame(in: .named("G"))
                             PhotosItemView(assets: .constant(selectedAssets.asset))
                                 .scaledToFit()
-//                                .overlay{
-//                                    GeometryReader{ proxy in
-//                                        Color.clear
-//                                            .preference(key: SizePreferenceKey.self, value: proxy.size)
-//                                            .onChange(of: proxy.size){ value in
-//                                                self.cropSize = proxy.size
-//                                            }
-//                                    }
-//                                }
                                 .frame(maxWidth: .infinity,maxHeight: .infinity)
                                 .matchedGeometryEffect(id: selectedAssets.asset.localIdentifier, in: namespace)
                                 .onChange(of: changed) { change in
@@ -467,7 +449,7 @@ struct PhotosView: View {
                         .scaleEffect(mainCurrentScale)
                         .offset(currentOffset)
                         .simultaneousGesture(pinch)
-                        .onTapGesture(count: 2) { // 더블 탭 감지
+                        .onTapGesture(count: 2) {
                             withAnimation {
                                 if mainCurrentScale == 1{
                                     mainCurrentScale = 2
@@ -628,7 +610,6 @@ struct PhotosView: View {
                 Button {
                     withAnimation(.easeIn(duration: 0.1)) {
                         self.selectedAssets = nil
-//                        cropSize = .zero
                     }
                     
                 } label: {
@@ -738,11 +719,6 @@ struct PhotosView: View {
                 } label: {
                     Image(systemName:!info ? "info.circle" : "info.circle.fill")
                 }
-//                Button {
-//                    crop = true
-//                } label: {
-//                    Image(systemName:"crop.rotate")
-//                }
                 .padding(.leading,30)
             }
             .padding(10)
@@ -761,7 +737,6 @@ struct PhotosView: View {
                                 vm.assetList = vm.assetList.filter{$0 != asset}
                                 vm.assets = vm.assetList
                                 self.selectedAssets = nil
-//                                cropSize = .zero
                                 self.show = false
                                 vm.fetchAlbums()
                             }
@@ -888,7 +863,6 @@ struct PhotosView: View {
                                 self.info = false
                             }else{
                                 self.selectedAssets = nil
-//                                cropSize = .zero
                             }
                         }
                     }

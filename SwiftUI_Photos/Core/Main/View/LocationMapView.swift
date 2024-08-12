@@ -77,8 +77,6 @@ struct LocationMapView: View {
                             .padding(.horizontal)
                             .background(Capsule().foregroundColor(.white))
                     }
-
-                    
                 }
             }
         }
@@ -92,7 +90,7 @@ struct LocationMapView: View {
     var mapAnnotationsView:some View{
         if let asset = annotions.first?.asset{
             VStack(spacing: 0){
-                PhotosItemView(assets:asset)
+                PhotosItemView(assets:.constant(asset))
                     .scaledToFill()
                     .clipShape(/*@START_MENU_TOKEN@*/Circle()/*@END_MENU_TOKEN@*/)
                     .frame(width: 40,height: 40)

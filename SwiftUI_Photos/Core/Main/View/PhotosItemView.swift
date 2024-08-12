@@ -9,7 +9,7 @@ import SwiftUI
 import Photos
 
 struct PhotosItemView: View {
-    let assets:PHAsset
+    @Binding var assets:PHAsset
     @EnvironmentObject var vm: PhotoViewModel
     @State var image:UIImage?
     var body: some View {
@@ -21,7 +21,11 @@ struct PhotosItemView: View {
                 Color.gray.opacity(0.1)
             }
         }
+        .transition(.move(edge: .trailing))
         .onAppear{
+            vm.fetchImageFromAsset(asset: assets,targetSize: CGSize(width: width(), height: height())) { image = $0 }
+        }
+        .onChange(of: assets) { assets in
             vm.fetchImageFromAsset(asset: assets,targetSize: CGSize(width: width(), height: height())) { image = $0 }
         }
     }
@@ -29,5 +33,5 @@ struct PhotosItemView: View {
 
 
 #Preview {
-    PhotosItemView(assets: PHAsset())
+    PhotosItemView(assets: .constant(PHAsset()))
 }

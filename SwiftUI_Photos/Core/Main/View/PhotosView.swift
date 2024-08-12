@@ -44,6 +44,7 @@ struct PhotosView: View {
     @State var isMap = false
     
     @State var isFavorite = false
+    @State var selecteIndex:Int = 0
     
     var body: some View {
         ZStack{
@@ -122,8 +123,9 @@ struct PhotosView: View {
                 .frame(height: 1)
                 if selectedAssets == nil{
                     LazyVGrid(columns:assetsItems,spacing: 0){
-                        ForEach(vm.assetList, id: \.self) { asset in
-                            PhotosItemView(assets: asset)
+                        ForEach(vm.assetList.indices, id: \.self) { index in
+                            let asset = vm.assetList[index]
+                            PhotosItemView(assets: .constant(asset))
                                 .background(Color.white)
                                 .aspectRatio(contentMode: isFill ? .fill : .fit)
                                 .frame(width: size.width, height: size.height)
@@ -148,8 +150,9 @@ struct PhotosView: View {
                                     vm.progress = true
                                     switch asset.mediaType{
                                     case .image:
+                                        self.selecteIndex = index
                                         withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
-                                            selectedAssets = asset
+                                            self.selectedAssets = asset
                                         }
                                     case .video: playVideo(asset:asset,id:asset.localIdentifier)
                                     default: return
@@ -406,7 +409,7 @@ struct PhotosView: View {
                 if let selectedAssets {
                     GeometryReader{ geo in
                         let g = geo.frame(in: .named("G"))
-                        PhotosItemView(assets: selectedAssets)
+                        PhotosItemView(assets: .constant(selectedAssets))
                             .scaledToFit()
                             .frame(maxWidth: .infinity,maxHeight: .infinity)
                             .matchedGeometryEffect(id: selectedAssets.localIdentifier, in: namespace)
@@ -837,7 +840,7 @@ struct PhotosView: View {
             Color.white
             Color.gray.opacity(0.3)
             if let assets{
-                PhotosItemView(assets: assets)
+                PhotosItemView(assets: .constant(assets))
                     .scaledToFill()
             }
         }
@@ -890,17 +893,27 @@ struct PhotosView: View {
             .onChanged{ gesture in
                 if mainCurrentScale != 1{
                     currentOffset = endOffset + gesture.translation
-                }else{
-                    if gesture.translation.height < 0{
-                        withAnimation {
-                            self.info = true
-                        }
-                    }
                 }
             }
             .onEnded { gesture in
                 if mainCurrentScale == 1{
-                    if gesture.translation.height > 0{
+                    
+                    if gesture.translation.width < -20{
+                            guard selecteIndex < vm.assetList.count-1 else {return}
+                            self.selecteIndex += 1
+                            selectedAssets = vm.assetList[selecteIndex]
+                    }
+                    if gesture.translation.width > 20{
+                            guard selecteIndex > 0 else {return}
+                            self.selecteIndex -= 1
+                            selectedAssets = vm.assetList[selecteIndex]
+                    }
+                    if gesture.translation.height < -20{
+                        withAnimation {
+                            self.info = true
+                        }
+                    }
+                    if gesture.translation.height > 20{
                         withAnimation {
                             if info{
                                 self.info = false

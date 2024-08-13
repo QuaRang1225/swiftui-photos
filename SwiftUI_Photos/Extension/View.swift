@@ -87,4 +87,10 @@ extension View{
             }
         }
     }
+    @ViewBuilder
+    func show(_ condition:Bool) -> some View{
+        if condition{
+            self
+        }
+    }
 }

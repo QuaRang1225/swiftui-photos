@@ -122,12 +122,9 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
         return assets.firstObject
         
     }
-    
+    //첫 이미지 가져오는 메서드
     func fetchPhotosFirstAssets(mode:PhotosFilter) -> PHAsset?{
         let fetchOptions = PHFetchOptions()
-        if mode == .bookmark{
-            fetchOptions.predicate = NSPredicate(format: "favorite == YES")
-        }
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: isAsscending)]
         fetchOptions.fetchLimit = 1
         

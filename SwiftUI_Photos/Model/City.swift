@@ -8,6 +8,7 @@
 import Foundation
 import Photos
 
+///**MapView에서 어노테이션으로 사용할 DTO**
 struct City: Identifiable {
     let id = UUID()
     let asset: PHAsset

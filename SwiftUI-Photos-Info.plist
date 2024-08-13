@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>NSAppTransportSecurity</key>
+	<dict/>
+    <key>NSPhotoLibraryUsageDescription</key>
+    <string>"갤러리"가 사진 또는 동영상을 사용하기 위해 라이브러리에 접근하도록 허용합니다.</string>
+</dict>
+</plist>

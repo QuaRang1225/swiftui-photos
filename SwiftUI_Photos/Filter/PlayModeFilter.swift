@@ -7,6 +7,7 @@
 
 import Foundation
 
+///**비디오의 플레이 모드를 설정하는 필터**
 enum PlayModeFilter:CaseIterable{
     case slow
     case normal

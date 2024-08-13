@@ -8,6 +8,7 @@
 import Foundation
 import Photos
 
+///**항목이 저장된 위치를 설정하는 필터**
 enum SourceTypeFilter: String,CaseIterable {
     case userLibrary = "사용자 라이브러리"
     case sharedAlbum = "공유 앨범"

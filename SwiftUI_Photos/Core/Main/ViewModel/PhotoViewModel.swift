@@ -12,10 +12,10 @@ import Combine
 
 class PhotoViewModel: ObservableObject,FetchPhoto {
     
-    @Published var progress = true                          //이미지 불러오는 중 여부
-    @Published var assets: [PHAsset] = []                   //실제 보여질 이미지 리스트 -> Assets리스트로 수정
+    @Published var progress = true                          ///이미지 불러오는 중 여부
+    @Published var assets: [PHAsset] = []                   ///실제 보여질 이미지 리스트 -> Assets리스트로 수정
     @Published var assetList: [PHAsset] = []
-    @Published var accessDenied = false                     //앨범 접근 허용 여부
+    @Published var accessDenied = false                     ///앨범 접근 허용 여부
     
     @Published var album:AlbumListItem?
     @Published var albums:[AlbumListItem] = []
@@ -58,7 +58,6 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             }
         }
     }
-    
     func fetchAlbumAssets(from collection: PHAssetCollection?,condition:NSPredicate?) {
         self.progress = true
         //필터링,정렬 등 받아온 결괏값의 옵션을 부여할 수 있는 클래스
@@ -98,7 +97,6 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             self.progress = false
         }
     }
-    
     func fetchImageFromAsset(asset: PHAsset,targetSize:CGSize,completion: @escaping (UIImage?)->()){
         //앨범에서 이미지 및 비디오 요청 및 관리하는 클래스
         let imageManager = PHCachingImageManager()
@@ -113,7 +111,6 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             completion(image)
         }
     }
-    
     func fetchAlbumsFirstAssets(collection:PHAssetCollection)->PHAsset?{
         let fetchOptions = PHFetchOptions()
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: isAsscending)]
@@ -122,7 +119,6 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
         return assets.firstObject
         
     }
-    //첫 이미지 가져오는 메서드
     func fetchPhotosFirstAssets(mode:PhotosFilter) -> PHAsset?{
         let fetchOptions = PHFetchOptions()
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: isAsscending)]
@@ -131,15 +127,12 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
         let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)
         return fetchResult.firstObject
     }
-    
-    //이미지 저장
     func saveImageToPhotoLibrary() {
         guard let image = UIImage(systemName: "star") else { return }
         PHPhotoLibrary.requestAuthorization { status in
             if status == .authorized {
                 PHPhotoLibrary.shared().performChanges({
                     _ = PHAssetCreationRequest.creationRequestForAsset(from: image)
-                    // 필요한 경우, 추가적인 메타데이터 설정 등을 할 수 있습니다.
                 }) { success, error in
                     if success {
                         print("Image successfully saved to the photo library.")
@@ -152,7 +145,6 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             }
         }
     }
-   
     func assetFavorite(asset: PHAsset, isFavorite:Bool,completion:@escaping (PHAsset?,Bool) ->()){
         PHPhotoLibrary.shared().performChanges({
             let request = PHAssetChangeRequest(for: asset)
@@ -167,7 +159,6 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             }
         }
     }
-
     func deleteAssetLibrary(asset: PHAsset,completion:@escaping (PHAsset)->()) {
         PHPhotoLibrary.shared().performChanges({
             PHAssetChangeRequest.deleteAssets([asset] as NSFastEnumeration)

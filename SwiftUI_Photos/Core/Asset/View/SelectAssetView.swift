@@ -372,7 +372,7 @@ extension SelectAssetView{
             .clipShape(Capsule())
             
             Spacer()
-            CustomButton(image: "trash", buttonColor: .gray.opacity(0.3), imageColor: .black) {
+            CustomButton(image: "trash", buttonColor: .gray.opacity(0.3), imageColor: .blue) {
                 guard let selectedAsset else { return }
                 vm.deleteAssetLibrary(asset: selectedAsset.asset){ asset in
                     withAnimation(.easeIn(duration: 0.1)) {

@@ -8,10 +8,13 @@
 import SwiftUI
 import Photos
 
+///**항목 이미지뷰**
+///- 선택한 PHAsset타입을 UIImage로 바꿔주는 컴포넌트
 struct PhotosItemView: View {
+    @State var image:UIImage?
     @Binding var assets:PHAsset
     @EnvironmentObject var vm: PhotoViewModel
-    @State var image:UIImage?
+    
     var body: some View {
         ZStack{
             if let image{

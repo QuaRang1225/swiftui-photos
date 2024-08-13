@@ -31,7 +31,7 @@ struct LocationMapView: View {
     let annotions:[City]
     @State private var region = MKCoordinateRegion()
     let span = MKCoordinateSpan(latitudeDelta: 0.1, longitudeDelta: 0.1)
-    @Binding var dismiss:Bool
+    @Environment(\.dismiss) var dismiss
     @StateObject var vm = PhotoViewModel()
     
     var body: some View {
@@ -57,7 +57,7 @@ struct LocationMapView: View {
                         .bold()
                         Spacer()
                         Button {
-                            dismiss = false
+                            dismiss()
                         } label: {
                             Image(systemName: "xmark.circle.fill")
                                 .font(.title)
@@ -116,6 +116,6 @@ struct LocationMapView: View {
 }
 
 #Preview {
-    LocationMapView(buttonMode: true, annotions: [City(asset: PHAsset(), country: "asdasd", city: "asd", district: "asda")], dismiss: .constant(false))
+    LocationMapView(buttonMode: true, annotions: [City(asset: PHAsset(), country: "asdasd", city: "asd", district: "asda")])
         .environmentObject(PhotoViewModel())
 }

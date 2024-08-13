@@ -53,7 +53,6 @@ struct PhotosView: View {
     @Namespace private var namespace
     ///헤더 뷰 background
     @State var backgroundImage:UIImage?
-    /// ViewModel
     @StateObject var vm = PhotoViewModel()
     
     ///그리드 아이템 배열
@@ -64,7 +63,7 @@ struct PhotosView: View {
     var body: some View {
         ZStack{
             assetListView
-            SeleteAssetView(selectedAsset: $selectedAsset, selectedIndex: $selectedIndex, photosMode: $photosMode, show: $show, namespace: namespace)
+            SelectAssetView(show: $show, namespace: namespace, selectedAsset: $selectedAsset, selectedIndex: $selectedIndex, photosMode: $photosMode)
             categoryMenuView
         }
         .progress(vm.progress)
@@ -74,161 +73,6 @@ struct PhotosView: View {
         .gesture(gridAdjustmenGesture)
         .environmentObject(vm)
     }
-    
-    //Container--------------------------------------------------------------------------------------------------
-    ///**항목 리스트**
-    ///
-    ///- 사용자 갤러리에 존재하는 모든 항목을 리스트로 반환하는 뷰
-    ///
-    ///## 옵션
-    ///- 전체항목
-    ///- 즐겨찾기 항목
-    ///- 사진 및 비디오 서브타입
-    ///- 앨범 리스트 항목
-    @ViewBuilder
-    private var assetListView:some View{
-        ScrollView(){
-            VStack(spacing:0){
-                backgroundView
-                GeometryReader{ proxy in
-                    let minY = proxy.frame(in: .global).minY
-                    LazyVGrid(columns:assetsItems,spacing: 0){
-                        ForEach(vm.assetList.indices, id: \.self) { index in
-                            let asset = vm.assetList[index]
-                            assetItemsRowView(asset: asset,index:index)
-                        }
-                    }
-                    .onChange(of: minY){ scrollEvent(value: $0) }
-                }
-                .frame(height: gridItemSize.height * CGFloat(ceil(Double(vm.assetList.count)/3)))
-            }
-        }
-        .overlay(alignment: .topLeading){ headerControllView }
-    }
-    ///**항목 카테고리 타입 별 리스트 뷰**
-    ///
-    ///- 미디어 타입에 따라 이미지 혹은 비디오 카테고리 리스트 반환
-    @ViewBuilder
-    private func categoryListView(list:[PhotosFilter]) -> some View{
-        ForEach(list,id: \.self){ filter in
-            Button {
-                self.photosMode = filter
-                menu = false
-            } label: {
-                HStack{
-                    Image(systemName: filter.image)
-                    Text(filter.rawValue)
-                }
-                .padding(.vertical,15)
-            }
-        }
-    }
-    ///**항목 카테고리 리스트 뷰**
-    ///
-    ///- 사진 : 즐겨 찾기/스크린샷/Live Photo 등
-    ///- 비디오 : 스트리밍/시네마틱/타임랩스 등
-    @ViewBuilder
-    private var categoryMenuView:some View{
-        ZStack{
-            Color.clear
-                .background(Material.thin)
-                .colorScheme(.dark)
-            ScrollView(showsIndicators: false){
-                VStack{
-                    let list = PhotosFilter.allCases.filter{$0 != .all && $0 != .other}
-                    Text("사진").font(.title).bold()
-                    categoryListView(list: list.filter{$0.type == .photo})
-                    Text("비디오").font(.title).bold()
-                    categoryListView(list: list.filter{$0.type == .video})
-                }.foregroundColor(.white)
-                    .padding(.vertical,100)
-            }
-        }
-        .onTapGesture {
-            withAnimation {
-                menu.toggle()
-            }
-        }
-        .show(menu)
-    }
-    ///**백그라운드 뷰**
-    ///
-    ///- 현재 보고 있는 앨범의 첫 화면을 백그라운드로 설정
-    @ViewBuilder
-    private var backgroundView:some View{
-        BlurBackGround(height: show ? height()/2.5 : height()/6) {
-            Group{
-                if let backgroundImage{
-                    Image(uiImage: backgroundImage)
-                        .resizable()
-                }
-            }
-        }
-    }
-    ///**사진 보기 옵션**
-    ///
-    ///- 아이템 비율 기능 (``ratioView``)
-    ///- 정렬 기능 (과거순,최신순)
-    @ViewBuilder
-    private var optionCategoryView:some View{
-        HStack{
-            ratioView
-            CustomButton(image: "arrow.up.arrow.down", text: vm.isAsscending ? "과거순":"최신순", buttonColor: .gray, imageColor: .white) {
-                withAnimation {
-                    vm.isAsscending.toggle()
-                    vm.fetchAlbumAssets(from: vm.album?.collection, condition: photosMode.predicate)
-                    vm.fetchAlbums()
-                    show = false
-                }
-            }
-            Spacer()
-        }
-        .padding([.horizontal,.bottom])
-    }
-    ///**앨범 리스트**
-    ///
-    ///- 전체 항목과 사용자 앨범리스트를 캐러셀형태로 구현되어있는 뷰
-    ///- 각 버튼은 photosMode를 변경해 전체 앨범 리스트를 업데이트하고 앨범정보를 표시하기 위래 PhotoViewModel에 album 상태변수를 업데이트
-    ///- 현재 앨범 항목 선택에 따라 backgroud 이미지 업데이트 만약 이미지가 없을 경우 nil 저장
-    @ViewBuilder
-    private var albumsListView:some View{
-        GeometryReader{ proxy in
-            VStack{
-                ScrollView(.horizontal,showsIndicators: false){
-                    HStack{
-                        AlbumRow(assets: vm.fetchPhotosFirstAssets(mode: .all), text: PhotosFilter.all.rawValue) {
-                            photosMode = .all
-                            vm.album = nil
-                            vm.fetchAlbumAssets(from: nil, condition: nil)
-                            guard let asset = vm.fetchPhotosFirstAssets(mode:.all) else{ return self.backgroundImage = nil }
-                            vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.backgroundImage = $0 }
-                        }
-                        ForEach(vm.albums,id: \.id) { album in
-                            AlbumRow(assets: album.asset, text: album.title) {
-                                photosMode = .other
-                                vm.album = album
-                                vm.fetchAlbumAssets(from: album.collection, condition: nil)
-                                guard let asset = vm.fetchAlbumsFirstAssets(collection: album.collection) else{ return self.backgroundImage = nil }
-                                vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.backgroundImage = $0 }
-                            }
-                        }
-                    }.padding(.horizontal)
-                }.show(show)
-            }
-            .onAppear{ mainOffsetY = proxy.frame(in: .global).maxY }
-            .onChange(of: show) { value in
-                withAnimation {
-                    mainOffsetY = value ? proxy.frame(in: .global).maxY: lastminY
-                }
-            }
-        }
-        .frame(height: width()/3.5 + 20)
-    }
-    
-    
-    
-    
-    
 }
 
 #Preview {
@@ -437,6 +281,154 @@ extension PhotosView{
                     self.lastScale = 1.0
                 }
             }
+    }
+    ///**항목 리스트**
+    ///
+    ///- 사용자 갤러리에 존재하는 모든 항목을 리스트로 반환하는 뷰
+    ///
+    ///## 옵션
+    ///- 전체항목
+    ///- 즐겨찾기 항목
+    ///- 사진 및 비디오 서브타입
+    ///- 앨범 리스트 항목
+    @ViewBuilder
+    private var assetListView:some View{
+        ScrollView(){
+            VStack(spacing:0){
+                backgroundView
+                GeometryReader{ proxy in
+                    let minY = proxy.frame(in: .global).minY
+                    LazyVGrid(columns:assetsItems,spacing: 0){
+                        ForEach(vm.assetList.indices, id: \.self) { index in
+                            let asset = vm.assetList[index]
+                            assetItemsRowView(asset: asset,index:index)
+                        }
+                    }
+                    .onChange(of: minY){ scrollEvent(value: $0) }
+                }
+                .frame(height: gridItemSize.height * CGFloat(ceil(Double(vm.assetList.count)/3)))
+            }
+        }
+        .overlay(alignment: .topLeading){ headerControllView }
+    }
+    ///**항목 카테고리 타입 별 리스트 뷰**
+    ///
+    ///- 미디어 타입에 따라 이미지 혹은 비디오 카테고리 리스트 반환
+    @ViewBuilder
+    private func categoryListView(list:[PhotosFilter]) -> some View{
+        ForEach(list,id: \.self){ filter in
+            Button {
+                self.photosMode = filter
+                menu = false
+            } label: {
+                HStack{
+                    Image(systemName: filter.image)
+                    Text(filter.rawValue)
+                }
+                .padding(.vertical,15)
+            }
+        }
+    }
+    ///**항목 카테고리 리스트 뷰**
+    ///
+    ///- 사진 : 즐겨 찾기/스크린샷/Live Photo 등
+    ///- 비디오 : 스트리밍/시네마틱/타임랩스 등
+    @ViewBuilder
+    private var categoryMenuView:some View{
+        ZStack{
+            Color.clear
+                .background(Material.thin)
+                .colorScheme(.dark)
+            ScrollView(showsIndicators: false){
+                VStack{
+                    let list = PhotosFilter.allCases.filter{$0 != .all && $0 != .other}
+                    Text("사진").font(.title).bold()
+                    categoryListView(list: list.filter{$0.type == .photo})
+                    Text("비디오").font(.title).bold()
+                    categoryListView(list: list.filter{$0.type == .video})
+                }.foregroundColor(.white)
+                    .padding(.vertical,100)
+            }
+        }
+        .onTapGesture {
+            withAnimation {
+                menu.toggle()
+            }
+        }
+        .show(menu)
+    }
+    ///**백그라운드 뷰**
+    ///
+    ///- 현재 보고 있는 앨범의 첫 화면을 백그라운드로 설정
+    @ViewBuilder
+    private var backgroundView:some View{
+        BlurBackGround(height: show ? height()/2.5 : height()/6) {
+            Group{
+                if let backgroundImage{
+                    Image(uiImage: backgroundImage)
+                        .resizable()
+                }
+            }
+        }
+    }
+    ///**사진 보기 옵션**
+    ///
+    ///- 아이템 비율 기능 (``ratioView``)
+    ///- 정렬 기능 (과거순,최신순)
+    @ViewBuilder
+    private var optionCategoryView:some View{
+        HStack{
+            ratioView
+            CustomButton(image: "arrow.up.arrow.down", text: vm.isAsscending ? "과거순":"최신순", buttonColor: .gray, imageColor: .white) {
+                withAnimation {
+                    vm.isAsscending.toggle()
+                    vm.fetchAlbumAssets(from: vm.album?.collection, condition: photosMode.predicate)
+                    vm.fetchAlbums()
+                    show = false
+                }
+            }
+            Spacer()
+        }
+        .padding([.horizontal,.bottom])
+    }
+    ///**앨범 리스트**
+    ///
+    ///- 전체 항목과 사용자 앨범리스트를 캐러셀형태로 구현되어있는 뷰
+    ///- 각 버튼은 photosMode를 변경해 전체 앨범 리스트를 업데이트하고 앨범정보를 표시하기 위래 PhotoViewModel에 album 상태변수를 업데이트
+    ///- 현재 앨범 항목 선택에 따라 backgroud 이미지 업데이트 만약 이미지가 없을 경우 nil 저장
+    @ViewBuilder
+    private var albumsListView:some View{
+        GeometryReader{ proxy in
+            VStack{
+                ScrollView(.horizontal,showsIndicators: false){
+                    HStack{
+                        AlbumRow(assets: vm.fetchPhotosFirstAssets(mode: .all), text: PhotosFilter.all.rawValue) {
+                            photosMode = .all
+                            vm.album = nil
+                            vm.fetchAlbumAssets(from: nil, condition: nil)
+                            guard let asset = vm.fetchPhotosFirstAssets(mode:.all) else{ return self.backgroundImage = nil }
+                            vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.backgroundImage = $0 }
+                        }
+                        ForEach(vm.albums,id: \.id) { album in
+                            AlbumRow(assets: album.asset, text: album.title) {
+                                photosMode = .other
+                                vm.album = album
+                                vm.fetchAlbumAssets(from: album.collection, condition: nil)
+                                guard let asset = vm.fetchAlbumsFirstAssets(collection: album.collection) else{ return self.backgroundImage = nil }
+                                vm.fetchImageFromAsset(asset: asset,targetSize: CGSize(width: width(), height: height())) { self.backgroundImage = $0 }
+                            }
+                        }
+                    }.padding(.horizontal)
+                }.show(show)
+            }
+            .onAppear{ mainOffsetY = proxy.frame(in: .global).maxY }
+            .onChange(of: show) { value in
+                withAnimation {
+                    mainOffsetY = value ? proxy.frame(in: .global).maxY: lastminY
+                }
+            }
+        }
+        .frame(height: width()/3.5 + 20)
     }
 }
 

@@ -153,7 +153,7 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
         }
     }
    
-    func assetavorite(asset: PHAsset, isFavorite:Bool,completion:@escaping (PHAsset?,Bool) ->()){
+    func assetFavorite(asset: PHAsset, isFavorite:Bool,completion:@escaping (PHAsset?,Bool) ->()){
         PHPhotoLibrary.shared().performChanges({
             let request = PHAssetChangeRequest(for: asset)
             request.isFavorite = !isFavorite

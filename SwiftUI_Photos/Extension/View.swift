@@ -93,4 +93,43 @@ extension View{
             self
         }
     }
+    
+    ///**로컬 이미지 UIImage로 변환**
+    func fetchImage(from asset: PHAsset, completion: @escaping (UIImage?) -> Void) {
+        let imageManager = PHImageManager.default()
+        let imageRequestOptions = PHImageRequestOptions()
+        imageRequestOptions.isSynchronous = true
+        
+        let size = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
+        imageManager.requestImage(for: asset,targetSize:size, contentMode: .aspectFill,options: imageRequestOptions) { image, _ in
+            completion(image)
+        }
+    }
+    
+    ///**로컬 비디오경로 URL로 변환**
+    func fetchVideoURL(from asset: PHAsset, completion: @escaping (URL?) -> Void) {
+        let videoManager = PHImageManager.default()
+        let videoRequestOptions = PHVideoRequestOptions()
+        
+        videoManager.requestAVAsset(forVideo: asset, options: videoRequestOptions) { avAsset, audioMix, _ in
+            guard let asset = avAsset as? AVURLAsset else { return completion(nil) }
+            completion(asset.url)
+        }
+    }
+    ///**공유**
+    func shareMedia(image:UIImage?,videoURL:URL?) {
+        var items: [Any] = []
+        
+        if let image{ items.append(image) }
+        if let videoURL { items.append(videoURL) }
+        let activityController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        
+        DispatchQueue.main.async {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                if let rootController = windowScene.windows.first?.rootViewController {
+                    rootController.present(activityController, animated: true, completion: nil)
+                }
+            }
+        }
+    }
 }

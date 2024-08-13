@@ -11,7 +11,7 @@ import Photos
 
 struct VideoPlayerView: View {
     var item: AVPlayer?
-    @Binding var offset: CGSize
+    @State var offset:CGSize = .zero
     @State private var currentTime: Double = 0
     @State private var duration: Double = 0
     @State private var isDragging: Bool = false
@@ -216,6 +216,6 @@ struct VideoPlayerView: View {
 }
 
 #Preview {
-    VideoPlayerView(item: AVPlayer(),offset: .constant(.zero))
+    VideoPlayerView(item: AVPlayer())
 }
 

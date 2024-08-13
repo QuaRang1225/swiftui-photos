@@ -8,6 +8,7 @@
 import Foundation
 
 extension Int{
+    ///**1,000이상의 숫자 콤마(,)제거**
     func removeCommas() -> String {
         return String(self).replacingOccurrences(of: ",", with: "")
     }

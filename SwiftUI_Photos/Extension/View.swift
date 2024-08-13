@@ -7,6 +7,8 @@
 
 import Foundation
 import SwiftUI
+import AVFoundation
+import Photos
 
 extension View{
     func width()->CGFloat{
@@ -70,5 +72,19 @@ extension View{
                     }
                 }
             )
+    }
+    func playVideo(asset: PHAsset,completion:@escaping (AVPlayerItem)->()){
+        let options = PHVideoRequestOptions()
+        options.isNetworkAccessAllowed = true
+        
+        PHImageManager.default().requestPlayerItem(forVideo: asset, options: options) { playerItem, _ in
+            DispatchQueue.main.async {
+                withAnimation(.spring(response: 0.25)) {
+                    if let playerItem {
+                        completion(playerItem)
+                    }
+                }
+            }
+        }
     }
 }

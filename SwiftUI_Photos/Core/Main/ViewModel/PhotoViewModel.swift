@@ -22,6 +22,8 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
     
     @Published var isAsscending = false
     @Published var isFilter = false
+    @Published var isFavorite = false
+    
     
     private let group = DispatchGroup()
     private let userInteractiveQueue = DispatchQueue.global(qos: .userInteractive)

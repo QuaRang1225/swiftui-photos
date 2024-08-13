@@ -7,6 +7,10 @@
 
 import SwiftUI
 
+///**커스텀 버튼**
+///
+///- 파라미터를 받아서 버튼을 생성하는 컴포넌트
+///- 이미지, 라벨, 버튼 및 이미지 색상, 이벤트 
 struct CustomButton: View {
     let image:String
     var text:String?

@@ -8,6 +8,10 @@
 import SwiftUI
 import Photos
 
+///**앨범 리스트 테이블 아이템**
+///
+///- 앨범 리스트를 선택할 수 있는 아이템의 Row뷰
+///- asset,타이틀,컬렉션, 이벤트 호출가능
 struct AlbumRow: View {
     let assets:PHAsset?
     let text:String

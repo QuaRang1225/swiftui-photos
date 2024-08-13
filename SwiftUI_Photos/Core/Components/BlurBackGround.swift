@@ -7,6 +7,9 @@
 
 import SwiftUI
 
+///**Blur 배경화면**
+///
+///- 이미지와 높이를 입력받아 스크롤 업/다운 시 크기가 변하는 Sticky헤더 뷰
 public struct BlurBackGround<Content:View>: View {
     
     let height:CGFloat

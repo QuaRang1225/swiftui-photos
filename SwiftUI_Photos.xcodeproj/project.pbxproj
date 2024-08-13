@@ -150,8 +150,8 @@
 			isa = PBXGroup;
 			children = (
 				D60A53892C6208CA001F73F2 /* SwiftUI-Photos-Info.plist */,
-				D61336FE2C6B0AF300D2CC5B /* ViewModifier */,
 				D60A53852C61F8D1001F73F2 /* App */,
+				D61336FE2C6B0AF300D2CC5B /* ViewModifier */,
 				D60A53A62C6402D3001F73F2 /* Model */,
 				D60A53A12C63E3D8001F73F2 /* Filter */,
 				D60A539A2C635690001F73F2 /* Protocol */,

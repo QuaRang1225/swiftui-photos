@@ -87,9 +87,7 @@ struct SizePreferenceKey: PreferenceKey {
 
 
 extension PhotosView{
-    
     //Method--------------------------------------------------------------------------------------------------
-    
     ///**생성자**
     ///- PhotosView 첫생성 시 호출
     ///- 초기 gird 아이템 수 초기화

@@ -29,6 +29,7 @@ struct LocationMapView: View {
                 }
             }
             .ignoresSafeArea()
+            mapOverlayView
         }
         .onAppear{
             guard let coordinate = annotions.first?.coordinate.coordinate else{return}

@@ -283,6 +283,7 @@ extension SelectAssetView{
             .padding(.bottom,5)
             .background(Color.reversal)
             .cornerRadius(5)
+            mapView(asset: asset)
             infoControllView.show(info)
         }
         .padding()

@@ -296,7 +296,7 @@
 		D61336F22C6AD26F00D2CC5B /* Asset */ = {
 			isa = PBXGroup;
 			children = (
-				D61336F32C6AD31F00D2CC5B /* SeleteAssetView.swift */,
+				D61A8A892C6B1A82009D911F /* View */,
 			);
 			path = Asset;
 			sourceTree = "<group>";
@@ -319,10 +319,26 @@
 			path = ViewModifier;
 			sourceTree = "<group>";
 		};
-		D6BBCCF42C6A172C002BDCA8 /* Photo */ = {
+		D61A8A892C6B1A82009D911F /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D61336F32C6AD31F00D2CC5B /* SeleteAssetView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		D61A8A8A2C6B1A88009D911F /* View */ = {
 			isa = PBXGroup;
 			children = (
 				D6BBCCF52C6A173C002BDCA8 /* CropImageView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		D6BBCCF42C6A172C002BDCA8 /* Photo */ = {
+			isa = PBXGroup;
+			children = (
+				D61A8A8A2C6B1A88009D911F /* View */,
 			);
 			path = Photo;
 			sourceTree = "<group>";

@@ -8,6 +8,7 @@
 import Foundation
 import Photos
 
+///**앨범 리스트 DTO**
 struct AlbumListItem{
     let id:String
     let asset:PHAsset?

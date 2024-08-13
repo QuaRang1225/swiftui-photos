@@ -8,6 +8,9 @@
 import Foundation
 
 extension Date?{
+    ///**날짜를 문자열로 반환**
+    ///
+    ///- ex) 2024-08-12 17:15:00 +0000 -> 2024년 8월 12일 오후 5:15
     func formattedDate() -> String {
         guard let self else {
             return "알 수 없음"
@@ -17,6 +20,9 @@ extension Date?{
         dateFormatter.locale = Locale(identifier: "ko_KR")
         return dateFormatter.string(from: self)
     }
+    ///**날짜를 문자열로 반환**
+    ///
+    ///- ex) 2024-08-12 17:15:00 +0000 -> (2024년 8월 12일, 오후 5:15)
     func formattedTitleDate() -> (date:String,time:String) {
         guard let self else {
             return ("","")

@@ -12,16 +12,18 @@ import Combine
 
 class PhotoViewModel: ObservableObject,FetchPhoto {
     
-    @Published var progress = true                          //이미지 불러오는 중 여부
-    @Published var assets: [PHAsset] = []                   //실제 보여질 이미지 리스트 -> Assets리스트로 수정
+    @Published var progress = true                          ///이미지 불러오는 중 여부
+    @Published var assets: [PHAsset] = []                   ///실제 보여질 이미지 리스트 -> Assets리스트로 수정
     @Published var assetList: [PHAsset] = []
-    @Published var accessDenied = false                     //앨범 접근 허용 여부
+    @Published var accessDenied = false                     ///앨범 접근 허용 여부
     
     @Published var album:AlbumListItem?
     @Published var albums:[AlbumListItem] = []
     
     @Published var isAsscending = false
     @Published var isFilter = false
+    @Published var isFavorite = false
+    
     
     private let group = DispatchGroup()
     private let userInteractiveQueue = DispatchQueue.global(qos: .userInteractive)
@@ -56,7 +58,6 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             }
         }
     }
-    
     func fetchAlbumAssets(from collection: PHAssetCollection?,condition:NSPredicate?) {
         self.progress = true
         //필터링,정렬 등 받아온 결괏값의 옵션을 부여할 수 있는 클래스
@@ -96,7 +97,6 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             self.progress = false
         }
     }
-    
     func fetchImageFromAsset(asset: PHAsset,targetSize:CGSize,completion: @escaping (UIImage?)->()){
         //앨범에서 이미지 및 비디오 요청 및 관리하는 클래스
         let imageManager = PHCachingImageManager()
@@ -111,7 +111,6 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             completion(image)
         }
     }
-    
     func fetchAlbumsFirstAssets(collection:PHAssetCollection)->PHAsset?{
         let fetchOptions = PHFetchOptions()
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: isAsscending)]
@@ -120,27 +119,20 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
         return assets.firstObject
         
     }
-    
     func fetchPhotosFirstAssets(mode:PhotosFilter) -> PHAsset?{
         let fetchOptions = PHFetchOptions()
-        if mode == .bookmark{
-            fetchOptions.predicate = NSPredicate(format: "favorite == YES")
-        }
         fetchOptions.sortDescriptors = [NSSortDescriptor(key: "creationDate", ascending: isAsscending)]
         fetchOptions.fetchLimit = 1
         
         let fetchResult = PHAsset.fetchAssets(with: .image, options: fetchOptions)
         return fetchResult.firstObject
     }
-    
-    //이미지 저장
     func saveImageToPhotoLibrary() {
         guard let image = UIImage(systemName: "star") else { return }
         PHPhotoLibrary.requestAuthorization { status in
             if status == .authorized {
                 PHPhotoLibrary.shared().performChanges({
                     _ = PHAssetCreationRequest.creationRequestForAsset(from: image)
-                    // 필요한 경우, 추가적인 메타데이터 설정 등을 할 수 있습니다.
                 }) { success, error in
                     if success {
                         print("Image successfully saved to the photo library.")
@@ -153,33 +145,7 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             }
         }
     }
-    //    func savePhotoLibrary(asset: PHAsset) {
-    //        let imageManager = PHImageManager.default()
-    //        let imageOptions = PHImageRequestOptions()
-    //        imageOptions.isSynchronous = true
-    //
-    //        if asset.mediaType == .image {
-    //            // 이미지 처리
-    //            imageManager.requestImage(for: asset,
-    //                                      targetSize: PHImageManagerMaximumSize,
-    //                                      contentMode: .aspectFill,
-    //                                      options: imageOptions) { image, _ in
-    //                if let image = image {
-    //                    PHPhotoLibrary.shared().performChanges({
-    //                        PHAssetCreationRequest.creationRequestForAsset(from: image)
-    //                    }) { success, error in
-    //                        if success {
-    //                            print("Image successfully saved to the photo library.")
-    //                        } else if let error = error {
-    //                            print("Error saving image to the photo library: \(error.localizedDescription)")
-    //                        }
-    //                    }
-    //                } else {
-    //                    print("Failed to fetch image from PHAsset.")
-    //                }
-    //            }
-    //        }
-    func assetavorite(asset: PHAsset, isFavorite:Bool,completion:@escaping (PHAsset?,Bool) ->()){
+    func assetFavorite(asset: PHAsset, isFavorite:Bool,completion:@escaping (PHAsset?,Bool) ->()){
         PHPhotoLibrary.shared().performChanges({
             let request = PHAssetChangeRequest(for: asset)
             request.isFavorite = !isFavorite
@@ -193,25 +159,6 @@ class PhotoViewModel: ObservableObject,FetchPhoto {
             }
         }
     }
-    //    func saveVideoLibrary(asset: PHAsset) {
-    //        let videoOptions = PHVideoRequestOptions()
-    //        imageManager.requestAVAsset(forVideo: asset, options: videoOptions) { avAsset, _, _ in
-    //            if let avAsset = avAsset as? AVURLAsset {
-    //                let videoURL = avAsset.url
-    //                PHPhotoLibrary.shared().performChanges({
-    //                    PHAssetCreationRequest.creationRequestForAssetFromVideo(atFileURL: videoURL)
-    //                }) { success, error in
-    //                    if success {
-    //                        print("Video successfully saved to the photo library.")
-    //                    } else if let error = error {
-    //                        print("Error saving video to the photo library: \(error.localizedDescription)")
-    //                    }
-    //                }
-    //            } else {
-    //                print("Failed to fetch video from PHAsset.")
-    //            }
-    //        }
-    //    }
     func deleteAssetLibrary(asset: PHAsset,completion:@escaping (PHAsset)->()) {
         PHPhotoLibrary.shared().performChanges({
             PHAssetChangeRequest.deleteAssets([asset] as NSFastEnumeration)

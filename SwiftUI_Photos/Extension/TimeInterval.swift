@@ -8,6 +8,9 @@
 import Foundation
 
 extension TimeInterval {
+    ///**시간 차이를 문자열로 반환**
+    ///- ex) 5 -> 0:05
+    ///- ex) 67 -> 1:07
     func timeFormatter() -> String {
 
         let minute = Int(self) / 60

@@ -7,14 +7,19 @@
 
 import Foundation
 import SwiftUI
+import AVFoundation
+import Photos
 
 extension View{
+    ///디바이스의 전체 폭
     func width()->CGFloat{
         UIScreen.main.bounds.width
     }
+    ///디바이스의 전체 높이
     func height()->CGFloat{
         UIScreen.main.bounds.height
     }
+    ///**사용자 사진첩 접근에 허용했을 때와 아닐때의 예외처리 뷰**
     func userAllowAccessAlbum(_ accessDenied:Bool) -> some View{
         ZStack{
             if !accessDenied{
@@ -37,6 +42,7 @@ extension View{
             }
         }
     }
+    ///**특정 이벤트가 실행 중일때 ProgressView Show**
     func progress(_ isLoading:Bool) -> some View{
         ZStack{
             self
@@ -50,25 +56,62 @@ extension View{
             }
         }
     }
-    func itemCloseGesture(position: Binding<CGSize>,closeAction:@escaping()->()) -> some View{
-        self
-            .gesture(
-                DragGesture()
-                .onChanged { value in
-                    position.wrappedValue = CGSize(width: 0, height: value.translation.height)
+    ///**Asset을 비디오 항목을 변환**
+    func playVideo(asset: PHAsset,completion:@escaping (AVPlayerItem)->()){
+        let options = PHVideoRequestOptions()
+        options.isNetworkAccessAllowed = true
+        
+        PHImageManager.default().requestPlayerItem(forVideo: asset, options: options) { playerItem, _ in
+            DispatchQueue.main.async {
+                withAnimation(.spring(response: 0.25)) {
+                    guard let playerItem else{ return }
+                    completion(playerItem)
                 }
-                .onEnded { value in
-                    if 50 < position.wrappedValue.height {
-                        withAnimation(.spring(duration: 0.1)){
-                            closeAction()
-                            position.wrappedValue = .zero
-                        }
-                    }else{
-                        withAnimation(.spring(response: 0.75, dampingFraction: 0.75)) {
-                            position.wrappedValue = .zero
-                        }
-                    }
+            }
+        }
+    }
+    ///**조건에 따라 현재 뷰 Show/Hide**
+    @ViewBuilder
+    func show(_ condition:Bool) -> some View{
+        if condition{ self }
+    }
+    
+    ///**로컬 이미지 UIImage로 변환**
+    func fetchImage(from asset: PHAsset, completion: @escaping (UIImage?) -> Void) {
+        let imageManager = PHImageManager.default()
+        let imageRequestOptions = PHImageRequestOptions()
+        imageRequestOptions.isSynchronous = true
+        
+        let size = CGSize(width: asset.pixelWidth, height: asset.pixelHeight)
+        imageManager.requestImage(for: asset,targetSize:size, contentMode: .aspectFill,options: imageRequestOptions) { image, _ in
+            completion(image)
+        }
+    }
+    
+    ///**로컬 비디오경로 URL로 변환**
+    func fetchVideoURL(from asset: PHAsset, completion: @escaping (URL?) -> Void) {
+        let videoManager = PHImageManager.default()
+        let videoRequestOptions = PHVideoRequestOptions()
+        
+        videoManager.requestAVAsset(forVideo: asset, options: videoRequestOptions) { avAsset, audioMix, _ in
+            guard let asset = avAsset as? AVURLAsset else { return completion(nil) }
+            completion(asset.url)
+        }
+    }
+    ///**공유**
+    func shareMedia(image:UIImage?,videoURL:URL?) {
+        var items: [Any] = []
+        
+        if let image{ items.append(image) }
+        if let videoURL { items.append(videoURL) }
+        let activityController = UIActivityViewController(activityItems: items, applicationActivities: nil)
+        
+        DispatchQueue.main.async {
+            if let windowScene = UIApplication.shared.connectedScenes.first as? UIWindowScene {
+                if let rootController = windowScene.windows.first?.rootViewController {
+                    rootController.present(activityController, animated: true, completion: nil)
                 }
-            )
+            }
+        }
     }
 }

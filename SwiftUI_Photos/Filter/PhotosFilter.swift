@@ -8,6 +8,7 @@
 import Foundation
 import Photos
 
+///**항목의 서브카테고리를 설정하는 필터**
 enum PhotosFilter:String,CaseIterable{
     case all = "전체 항목"
     case bookmark = "즐겨찾는 항목"

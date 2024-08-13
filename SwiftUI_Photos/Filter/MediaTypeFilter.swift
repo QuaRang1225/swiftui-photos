@@ -7,6 +7,7 @@
 
 import Foundation
 
+///**항목의 카테고리를 설정하는 필터**
 enum MediaTypeFilter:String,CaseIterable{
     case photo = "사진"
     case video = "비디오"

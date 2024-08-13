@@ -24,7 +24,13 @@
 		D60A53AC2C643CF7001F73F2 /* TimeInterval.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53AB2C643CF7001F73F2 /* TimeInterval.swift */; };
 		D60A53AE2C645452001F73F2 /* PlayModeFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53AD2C645452001F73F2 /* PlayModeFilter.swift */; };
 		D60A53B32C64A8E1001F73F2 /* AVPlayerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53B22C64A8E0001F73F2 /* AVPlayerView.swift */; };
-		D60A53B52C64AED8001F73F2 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D60A53B42C64AED8001F73F2 /* ContentView.swift */; };
+		D61336F42C6AD31F00D2CC5B /* SelectAssetView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61336F32C6AD31F00D2CC5B /* SelectAssetView.swift */; };
+		D61336FB2C6AF44E00D2CC5B /* CustomButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61336FA2C6AF44E00D2CC5B /* CustomButton.swift */; };
+		D61336FD2C6B01D000D2CC5B /* BlurBackGround.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61336FC2C6B01D000D2CC5B /* BlurBackGround.swift */; };
+		D61337002C6B0B1500D2CC5B /* AlbumListRowModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61336FF2C6B0B1500D2CC5B /* AlbumListRowModifier.swift */; };
+		D61337022C6B0BB000D2CC5B /* AlbumRow.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61337012C6B0BB000D2CC5B /* AlbumRow.swift */; };
+		D61A8A8C2C6B2208009D911F /* ImageOptionViewModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61A8A8B2C6B2208009D911F /* ImageOptionViewModifier.swift */; };
+		D61A8A8F2C6B3834009D911F /* City.swift in Sources */ = {isa = PBXBuildFile; fileRef = D61A8A8E2C6B3834009D911F /* City.swift */; };
 		D6ABD31E2C65244700ADA099 /* PhotosFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ABD31D2C65244700ADA099 /* PhotosFilter.swift */; };
 		D6ABD32A2C664D5C00ADA099 /* LocationMapView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ABD3292C664D5C00ADA099 /* LocationMapView.swift */; };
 		D6ABD32C2C66905F00ADA099 /* MediaTypeFilter.swift in Sources */ = {isa = PBXBuildFile; fileRef = D6ABD32B2C66905F00ADA099 /* MediaTypeFilter.swift */; };
@@ -76,7 +82,13 @@
 		D60A53AB2C643CF7001F73F2 /* TimeInterval.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimeInterval.swift; sourceTree = "<group>"; };
 		D60A53AD2C645452001F73F2 /* PlayModeFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PlayModeFilter.swift; sourceTree = "<group>"; };
 		D60A53B22C64A8E0001F73F2 /* AVPlayerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AVPlayerView.swift; sourceTree = "<group>"; };
-		D60A53B42C64AED8001F73F2 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		D61336F32C6AD31F00D2CC5B /* SelectAssetView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectAssetView.swift; sourceTree = "<group>"; };
+		D61336FA2C6AF44E00D2CC5B /* CustomButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomButton.swift; sourceTree = "<group>"; };
+		D61336FC2C6B01D000D2CC5B /* BlurBackGround.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BlurBackGround.swift; sourceTree = "<group>"; };
+		D61336FF2C6B0B1500D2CC5B /* AlbumListRowModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumListRowModifier.swift; sourceTree = "<group>"; };
+		D61337012C6B0BB000D2CC5B /* AlbumRow.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AlbumRow.swift; sourceTree = "<group>"; };
+		D61A8A8B2C6B2208009D911F /* ImageOptionViewModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageOptionViewModifier.swift; sourceTree = "<group>"; };
+		D61A8A8E2C6B3834009D911F /* City.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = City.swift; sourceTree = "<group>"; };
 		D6ABD31D2C65244700ADA099 /* PhotosFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotosFilter.swift; sourceTree = "<group>"; };
 		D6ABD3292C664D5C00ADA099 /* LocationMapView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LocationMapView.swift; sourceTree = "<group>"; };
 		D6ABD32B2C66905F00ADA099 /* MediaTypeFilter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MediaTypeFilter.swift; sourceTree = "<group>"; };
@@ -139,6 +151,7 @@
 			children = (
 				D60A53892C6208CA001F73F2 /* SwiftUI-Photos-Info.plist */,
 				D60A53852C61F8D1001F73F2 /* App */,
+				D61336FE2C6B0AF300D2CC5B /* ViewModifier */,
 				D60A53A62C6402D3001F73F2 /* Model */,
 				D60A53A12C63E3D8001F73F2 /* Filter */,
 				D60A539A2C635690001F73F2 /* Protocol */,
@@ -178,7 +191,10 @@
 		D60A53842C61F8C7001F73F2 /* Core */ = {
 			isa = PBXGroup;
 			children = (
-				D6BBCCF42C6A172C002BDCA8 /* Photos */,
+				D61A8A902C6B4728009D911F /* Map */,
+				D61336F92C6AF41200D2CC5B /* Components */,
+				D61336F22C6AD26F00D2CC5B /* Asset */,
+				D6BBCCF42C6A172C002BDCA8 /* Photo */,
 				D60A53B02C64A8A8001F73F2 /* Video */,
 				D60A53AF2C64A893001F73F2 /* Main */,
 			);
@@ -198,9 +214,6 @@
 			isa = PBXGroup;
 			children = (
 				D60A53872C61F8F0001F73F2 /* PhotosView.swift */,
-				D60A53952C63094F001F73F2 /* PhotosItemView.swift */,
-				D60A53B42C64AED8001F73F2 /* ContentView.swift */,
-				D6ABD3292C664D5C00ADA099 /* LocationMapView.swift */,
 			);
 			path = View;
 			sourceTree = "<group>";
@@ -250,6 +263,7 @@
 			children = (
 				D60A53A72C6402E0001F73F2 /* AssetItem.swift */,
 				D6BBCCF02C67D67C002BDCA8 /* AlbumListItem.swift */,
+				D61A8A8E2C6B3834009D911F /* City.swift */,
 			);
 			path = Model;
 			sourceTree = "<group>";
@@ -280,12 +294,72 @@
 			path = View;
 			sourceTree = "<group>";
 		};
-		D6BBCCF42C6A172C002BDCA8 /* Photos */ = {
+		D61336F22C6AD26F00D2CC5B /* Asset */ = {
 			isa = PBXGroup;
 			children = (
+				D61A8A892C6B1A82009D911F /* View */,
+			);
+			path = Asset;
+			sourceTree = "<group>";
+		};
+		D61336F92C6AF41200D2CC5B /* Components */ = {
+			isa = PBXGroup;
+			children = (
+				D61336FA2C6AF44E00D2CC5B /* CustomButton.swift */,
+				D61336FC2C6B01D000D2CC5B /* BlurBackGround.swift */,
+				D61337012C6B0BB000D2CC5B /* AlbumRow.swift */,
+			);
+			path = Components;
+			sourceTree = "<group>";
+		};
+		D61336FE2C6B0AF300D2CC5B /* ViewModifier */ = {
+			isa = PBXGroup;
+			children = (
+				D61336FF2C6B0B1500D2CC5B /* AlbumListRowModifier.swift */,
+				D61A8A8B2C6B2208009D911F /* ImageOptionViewModifier.swift */,
+			);
+			path = ViewModifier;
+			sourceTree = "<group>";
+		};
+		D61A8A892C6B1A82009D911F /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D61336F32C6AD31F00D2CC5B /* SelectAssetView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		D61A8A8A2C6B1A88009D911F /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D60A53952C63094F001F73F2 /* PhotosItemView.swift */,
 				D6BBCCF52C6A173C002BDCA8 /* CropImageView.swift */,
 			);
-			path = Photos;
+			path = View;
+			sourceTree = "<group>";
+		};
+		D61A8A902C6B4728009D911F /* Map */ = {
+			isa = PBXGroup;
+			children = (
+				D61A8A912C6B472E009D911F /* View */,
+			);
+			path = Map;
+			sourceTree = "<group>";
+		};
+		D61A8A912C6B472E009D911F /* View */ = {
+			isa = PBXGroup;
+			children = (
+				D6ABD3292C664D5C00ADA099 /* LocationMapView.swift */,
+			);
+			path = View;
+			sourceTree = "<group>";
+		};
+		D6BBCCF42C6A172C002BDCA8 /* Photo */ = {
+			isa = PBXGroup;
+			children = (
+				D61A8A8A2C6B1A88009D911F /* View */,
+			);
+			path = Photo;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -425,21 +499,27 @@
 				D6ABD3382C670C8000ADA099 /* CLLocation.swift in Sources */,
 				D60A53AE2C645452001F73F2 /* PlayModeFilter.swift in Sources */,
 				D60A53AC2C643CF7001F73F2 /* TimeInterval.swift in Sources */,
+				D61337002C6B0B1500D2CC5B /* AlbumListRowModifier.swift in Sources */,
 				D60A539C2C6356A2001F73F2 /* FetchPhoto.swift in Sources */,
 				D60A53882C61F8F0001F73F2 /* PhotosView.swift in Sources */,
 				D6ABD3362C66FA6A00ADA099 /* Int.swift in Sources */,
 				D60A53A82C6402E0001F73F2 /* AssetItem.swift in Sources */,
 				D6ABD32A2C664D5C00ADA099 /* LocationMapView.swift in Sources */,
 				D6BBCCF12C67D67C002BDCA8 /* AlbumListItem.swift in Sources */,
+				D61337022C6B0BB000D2CC5B /* AlbumRow.swift in Sources */,
+				D61336F42C6AD31F00D2CC5B /* SelectAssetView.swift in Sources */,
 				D6ABD32C2C66905F00ADA099 /* MediaTypeFilter.swift in Sources */,
+				D61336FB2C6AF44E00D2CC5B /* CustomButton.swift in Sources */,
 				D60A53922C623FFA001F73F2 /* PhotoViewModel.swift in Sources */,
 				D6ABD3302C66E85D00ADA099 /* SourceTypeFilter.swift in Sources */,
 				D60A53AA2C640327001F73F2 /* VideoPlayerView.swift in Sources */,
 				D60A53942C624667001F73F2 /* View.swift in Sources */,
 				D6ABD31E2C65244700ADA099 /* PhotosFilter.swift in Sources */,
-				D60A53B52C64AED8001F73F2 /* ContentView.swift in Sources */,
 				D6ABD3342C66F32000ADA099 /* Date.swift in Sources */,
+				D61A8A8F2C6B3834009D911F /* City.swift in Sources */,
 				D60A53832C61F580001F73F2 /* Documentation.docc in Sources */,
+				D61A8A8C2C6B2208009D911F /* ImageOptionViewModifier.swift in Sources */,
+				D61336FD2C6B01D000D2CC5B /* BlurBackGround.swift in Sources */,
 				D60A53562C61D79C001F73F2 /* SwiftUI_PhotosApp.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -622,9 +702,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "quarang.SwiftUI-Photos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Debug;
 		};
@@ -654,9 +738,13 @@
 				MARKETING_VERSION = 1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = "quarang.SwiftUI-Photos";
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
+				SUPPORTS_MACCATALYST = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = "1,2";
+				TARGETED_DEVICE_FAMILY = 1;
 			};
 			name = Release;
 		};

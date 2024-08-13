@@ -8,7 +8,8 @@
 import Foundation
 
 extension CGSize {
-  static func + (lhs: Self, rhs: Self) -> Self {
-    CGSize(width: lhs.width + rhs.width, height: lhs.height + rhs.height)
-  }
+    ///**size끼리의 합을 반환**
+    static func + (lhs: Self, rhs: Self) -> Self {
+        CGSize(width: lhs.width + rhs.width, height: lhs.height + rhs.height)
+    }
 }

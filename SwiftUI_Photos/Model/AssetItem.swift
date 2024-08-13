@@ -9,6 +9,7 @@ import Foundation
 import AVKit
 import Photos
 
+///**항목 리스트 DTO**
 struct AssetItem: Identifiable {
     let id: String
     var asset:PHAsset
@@ -19,5 +20,4 @@ struct AssetItem: Identifiable {
         self.asset = asset
         self.playerItem = playerItem
     }
-    
 }

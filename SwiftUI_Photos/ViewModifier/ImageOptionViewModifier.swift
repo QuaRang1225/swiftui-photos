@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+///**항목 상세정보에서 사용되는 뷰 수정자**
 struct ImageOptionViewModifier:ViewModifier{
     let condition:Bool
     func body(content: Content) -> some View {

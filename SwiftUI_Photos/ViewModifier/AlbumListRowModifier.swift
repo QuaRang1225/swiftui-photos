@@ -8,6 +8,7 @@
 import Foundation
 import SwiftUI
 
+///**앨범 리스트에 사용되는 뷰 수정자**
 struct AlbumListRowModifier: ViewModifier {
     func body(content: Content) -> some View {
         content
